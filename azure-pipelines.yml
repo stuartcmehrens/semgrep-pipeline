@@ -35,6 +35,7 @@ pool:
 container: semgrep
 
 steps:
+- shell: sh
 - checkout: repo1
 - script: |
     cat readme.md
