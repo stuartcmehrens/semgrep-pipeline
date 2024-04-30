@@ -37,8 +37,7 @@ container: semgrep
 
 steps:
 - checkout: repo1
-- shell: sh
-  script: |
+- script: |
     cat readme.md
     semgrep --version
 
