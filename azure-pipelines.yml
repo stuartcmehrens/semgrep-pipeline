@@ -28,6 +28,8 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- checkout: repo1
 - script: |
+    cat repo1/readme.md
     cat readme.md
   displayName: 'Run a cat'
