@@ -22,17 +22,21 @@ resources:
       branches:
         include:
         - main
+  containers:
+  - container: semgrep
+    image: semgrep/semgrep:latest
 
 
 pool:
   vmImage: 'ubuntu-latest'
 
+container: semgrep
+
 steps:
 - checkout: repo1
 - script: |
-    ls -alh
-    cat repo1/readme.md
     cat readme.md
+    semgrep --version
 # - checkout: repo2
 # - script: |
 #     ls -alh
