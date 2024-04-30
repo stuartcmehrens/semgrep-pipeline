@@ -22,23 +22,23 @@ resources:
       branches:
         include:
         - main
-  containers:
-  - container: semgrep
-    image: semgrep/semgrep:latest
-    options: --entrypoint tail
-    args: ['-f', '/dev/null']
+  # containers:
+  # - container: semgrep
+  #   image: semgrep/semgrep:latest
+  #   options: --entrypoint tail
+  #   args: ['-f', '/dev/null']
 
 
 pool:
   vmImage: 'ubuntu-latest'
 
-container: semgrep
+# container: semgrep
 
 
 steps:
 - checkout: repo1
 - script: |
-    cat readme.md
+    docker run -i semgrep/semgrep semgrep --version
     semgrep --version
 
 # - checkout: repo2
