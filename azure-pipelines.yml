@@ -33,9 +33,9 @@ steps:
     ls -alh
     cat repo1/readme.md
     cat readme.md
-- checkout: repo2
-- script: |
-    ls -alh
-    cat repo2/readme.md
-    cat readme.md
-  displayName: 'Run a cat'
+# - checkout: repo2
+# - script: |
+#     ls -alh
+#     cat repo2/readme.md
+#     cat readme.md
+#   displayName: 'Run a cat'
