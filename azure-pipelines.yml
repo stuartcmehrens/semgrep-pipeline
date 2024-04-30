@@ -4,16 +4,30 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+- none
+
+resources:
+  repositories:
+  - repository: repo1
+    type: git
+    name: repo1/repo1
+    trigger:
+      branches:
+        include:
+        - main
+  - repository: repo2
+    type: git
+    name: repo2/repo2
+    trigger:
+      branches:
+        include:
+        - main
+
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
 - script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+    cat readme.md
+  displayName: 'Run a cat'
