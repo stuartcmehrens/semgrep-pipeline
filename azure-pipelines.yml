@@ -7,7 +7,7 @@ trigger:
 - main
 
 pool:
-  vmImage: semgrep/semgrep:latest
+  vmImage: 'ubuntu-latest'
 
 steps:
 - script: echo Hello, world!
