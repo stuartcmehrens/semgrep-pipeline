@@ -25,6 +25,8 @@ resources:
   containers:
   - container: semgrep
     image: semgrep/semgrep:latest
+    entrypoint: tail
+    args: ['-f', '/dev/null']
 
 
 pool:
