@@ -33,13 +33,14 @@ pool:
   vmImage: 'ubuntu-latest'
 
 container: semgrep
+shell: sh
 
 steps:
 - checkout: repo1
 - script: |
     cat readme.md
     semgrep --version
-  shell: sh
+
 # - checkout: repo2
 # - script: |
 #     ls -alh
