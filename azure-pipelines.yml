@@ -15,10 +15,18 @@ resources:
       branches:
         include:
         - main
+    pr:
+      branches:
+        include:
+        - main
   - repository: repo2
     type: git
     name: repo2/repo2
     trigger:
+      branches:
+        include:
+        - main
+    pr:
       branches:
         include:
         - main
@@ -39,7 +47,7 @@ steps:
 - checkout: repo1
 - script: |
     docker run -i semgrep/semgrep semgrep --version
-    semgrep --version
+
 
 # - checkout: repo2
 # - script: |
