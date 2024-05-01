@@ -35,11 +35,21 @@ steps:
   persistCredentials: true
   clean: true
   fetchDepth: 0
+  path: repo
+- checkout: self
+  clean: true
+  fetchDepth: 0
+  path: self
 - script: |
+    pip install azure-devops
+    python check_prs.py
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     env
-    echo "Repository Display Name: $REPO_DISPLAY_NAME"
+    echo "------------------------------------------------------------------------------"
     echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
+    echo "Repository Display Name: $REPO_DISPLAY_NAME"
+    echo "------------------------------------------------------------------------------"
+    cd repo
     docker run \
       -v "./:/src" \
       -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
