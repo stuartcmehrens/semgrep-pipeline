@@ -48,15 +48,15 @@ pool:
 
 steps:
 - checkout: repo1
-  clean: true
-  fetchDepth: 0
   persistCredentials: true
 - script: |
+    git clone https://dev.azure.com/$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_git/$(Build.Repository.Name)
     ls -alh
     git checkout main
     git pull
     docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
-
+  env:
+    SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)  
 
 # - checkout: repo2
 # - script: |
