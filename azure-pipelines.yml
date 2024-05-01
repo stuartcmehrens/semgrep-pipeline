@@ -59,13 +59,13 @@ steps:
   clean: true
   fetchDepth: 0
 - script: |
-    export repoDisplayName=$($[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')])
+    export REPO_DISPLAY_NAME=$($[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')])
     echo "Running semgrep on $(Build.Repository.Name)"
-    echo "repodisplayname: $(repoDisplayName)"
+    echo "repodisplayname: $REPO_DISPLAY_NAME"
     docker run \
       -v "./:/src" \
       -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
-      -e SEMGREP_REPO_DISPLAY_NAME="$(repoDisplayName)" \
+      -e SEMGREP_REPO_DISPLAY_NAME="$REPO_DISPLAY_NAME" \
       -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
