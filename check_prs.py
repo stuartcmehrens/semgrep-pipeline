@@ -7,7 +7,7 @@ from msrest.authentication import BasicAuthentication
 def main():
     # Obtain the necessary variables from environment variables
     organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
-    project_name = os.environ['SYSTEM_TEAMPROJECT']
+    project_name = os.environ['BUILD_REPOSITORY_NAME']
     source_branch = os.environ['BUILD_SOURCEBRANCHNAME']
     personal_access_token = os.environ['SYSTEM_ACCESSTOKEN']
 
