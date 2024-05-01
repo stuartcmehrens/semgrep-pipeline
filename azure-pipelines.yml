@@ -50,6 +50,7 @@ steps:
 - checkout: repo1
   persistCredentials: true
 - script: |
+    echo $(Build.Repository.Uri)
     git clone $(Build.Repository.Uri) 
     docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
   env:
