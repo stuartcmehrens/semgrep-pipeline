@@ -17,11 +17,7 @@ resources:
     trigger:
       branches:
         include:
-        - main
-      # pr:
-      #   branches:
-      #     include:
-      #     - main
+        - '*'
   - repository: repo2/repo2
     type: git
     name: repo2/repo2
@@ -29,10 +25,7 @@ resources:
       branches:
         include:
         - main
-      # pr:
-      #   branches:
-      #     include:
-      #     - main
+
 
 pool:
   vmImage: 'ubuntu-latest'
