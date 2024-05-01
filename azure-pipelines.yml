@@ -46,7 +46,7 @@ steps:
     export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
     echo "------------------------------------------------------------------------------"
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
-    python ../self/check_prs.py 
+    python ./self/check_prs.py 
     env
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
