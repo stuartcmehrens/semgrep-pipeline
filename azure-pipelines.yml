@@ -43,6 +43,7 @@ steps:
 - script: |
     cd /home/vsts/work/1
     pip install azure-devops
+    SYSTEM_ACCESSTOKEN=$(System.AccessToken)
     python self/check_prs.py 
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     env
