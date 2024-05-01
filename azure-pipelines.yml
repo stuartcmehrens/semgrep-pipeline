@@ -8,13 +8,6 @@ trigger:
 
 variables:
 - group: semgrep-variables
-# - name: repoDisplayName
-#   value: $[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')]
-  # projectName: $(System.TeamProject)
-  # repoName: $(Build.Repository.Name)
-  # repoDisplayName: $[format('{0}/{1}/{2}', variables['orgName'], variables['projectName'], variables['repoName'])]
-
-
 
 resources:
   repositories:
@@ -40,18 +33,9 @@ resources:
       branches:
         include:
         - main
-  # containers:
-  # - container: semgrep
-  #   image: semgrep/semgrep:latest
-  #   options: --entrypoint tail
-  #   args: ['-f', '/dev/null']
-
 
 pool:
   vmImage: 'ubuntu-latest'
-
-# container: semgrep
-
 
 steps:
 - checkout: repo1/repo1
@@ -60,6 +44,7 @@ steps:
   fetchDepth: 0
 - script: |
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
+    env
     echo "Repository Display Name: $REPO_DISPLAY_NAME"
     echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
     docker run \
