@@ -11,7 +11,7 @@ variables:
 
 resources:
   repositories:
-  - repository: repo1
+  - repository: repo1/repo1
     type: git
     name: repo1/repo1
     trigger:
@@ -22,7 +22,7 @@ resources:
       branches:
         include:
         - main
-  - repository: repo2
+  - repository: repo2/repo2
     type: git
     name: repo2/repo2
     trigger:
