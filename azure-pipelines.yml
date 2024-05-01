@@ -49,10 +49,10 @@ pool:
 steps:
 - checkout: repo1
   persistCredentials: true
+  clean: true
+  fetchDepth: 0
 - script: |
-    echo $(Build.Repository.Uri)
-    git clone $(Build.Repository.Uri) 
-    docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
+    docker run -v "$(PWD):/src" -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
     GIT_CREDENTIALS: $(System.AccessToken)  
