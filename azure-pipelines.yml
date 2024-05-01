@@ -8,6 +8,12 @@ trigger:
 
 variables:
 - group: semgrep-variables
+  repoDisplayName: $[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')]
+  # projectName: $(System.TeamProject)
+  # repoName: $(Build.Repository.Name)
+  # repoDisplayName: $[format('{0}/{1}/{2}', variables['orgName'], variables['projectName'], variables['repoName'])]
+
+
 
 resources:
   repositories:
@@ -52,10 +58,12 @@ steps:
   clean: true
   fetchDepth: 0
 - script: |
+    echo "Running semgrep on $(Build.Repository.Name)"
+    echo "repodisplayname: $(repoDisplayName)"
     docker run \
       -v "./:/src" \
       -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
-      -e SEMGREP_REPO_DISPLAY_NAME="r2c-david/$(System.TeamProject)/$(Build.Repository.Name)" \
+      -e SEMGREP_REPO_DISPLAY_NAME="$(repoDisplayName)" \
       -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
