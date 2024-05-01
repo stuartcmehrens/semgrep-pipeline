@@ -51,6 +51,7 @@ steps:
     echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
     echo "Repository Display Name: $REPO_DISPLAY_NAME"
     echo "------------------------------------------------------------------------------"
+    env
     cd repo
     docker run \
       -v "./:/src" \
