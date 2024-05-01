@@ -60,7 +60,7 @@ steps:
   fetchDepth: 0
 - script: |
     export REPO_DISPLAY_NAME=$($[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')])
-    echo "Running semgrep on $(Build.Repository.Name)"
+    echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
     echo "repodisplayname: $REPO_DISPLAY_NAME"
     docker run \
       -v "./:/src" \
