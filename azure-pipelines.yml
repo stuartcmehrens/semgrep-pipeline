@@ -55,7 +55,7 @@ steps:
     docker run \
       -v "./:/src" \
       -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
-      -e SEMGREP_REPO_DISPLAY_NAME="$(System.CollectionUri)/$(System.TeamProject)/$(Build.Repository.Name)" \
+      -e SEMGREP_REPO_DISPLAY_NAME="r2c-david/$(System.TeamProject)/$(Build.Repository.Name)" \
       -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
