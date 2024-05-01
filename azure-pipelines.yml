@@ -53,7 +53,7 @@ steps:
   fetchDepth: 0
 - script: |
     docker run \
-      -v "./:/src" \ 
+      -v "./:/src" \
       -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
       -e SEMGREP_REPO_DISPLAY_NAME="$(System.CollectionUri)/$(System.TeamProject)/$(Build.Repository.Name)" \
       -i semgrep/semgrep semgrep ci
