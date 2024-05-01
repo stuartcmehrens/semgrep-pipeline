@@ -50,7 +50,7 @@ steps:
 - checkout: repo1
   persistCredentials: true
 - script: |
-    git clone https://dev.azure.com/$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_git/$(Build.Repository.Name)
+    git clone $(Build.Repository.Uri) 
     docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)  
