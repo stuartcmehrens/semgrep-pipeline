@@ -43,10 +43,10 @@ steps:
 - script: |
     cd /home/vsts/work/1
     pip install azure-devops
-    SYSTEM_ACCESSTOKEN=$(System.AccessToken)
+    export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
+    echo "------------------------------------------------------------------------------"
     python self/check_prs.py 
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
-    env
     echo "------------------------------------------------------------------------------"
     echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
     echo "Repository Display Name: $REPO_DISPLAY_NAME"
