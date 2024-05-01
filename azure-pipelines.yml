@@ -59,7 +59,7 @@ steps:
   clean: true
   fetchDepth: 0
 - script: |
-    REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|https://dev.azure.com/||')
+    REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||')
     echo "Repository Display Name: $REPO_DISPLAY_NAME"
     echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
     docker run \
