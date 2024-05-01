@@ -41,6 +41,7 @@ steps:
   fetchDepth: 0
   path: self
 - script: |
+    ls -alh
     pip install azure-devops
     python self/check_prs.py 
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
