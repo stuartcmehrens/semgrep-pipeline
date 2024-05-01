@@ -45,7 +45,7 @@ steps:
     pip install azure-devops
     export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
     echo "------------------------------------------------------------------------------"
-    REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
+    export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     python ./self/check_prs.py 
     env
   env:
