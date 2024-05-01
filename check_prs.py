@@ -5,6 +5,22 @@ from azure.devops.v7_0.git.git_client import GitClient
 from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria
 from msrest.authentication import BasicAuthentication
 
+def run_command(command):
+    # Start the subprocess
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    
+    # Read one line at a time as it becomes available
+    while True:
+        output = process.stdout.readline()
+        if output == '' and process.poll() is not None:
+            break
+        if output:
+            print(output.strip())
+    
+    # Wait for the subprocess to finish and get the exit code
+    rc = process.poll()
+    return rc
+
 def main():
     # Obtain the necessary variables from environment variables
     organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
@@ -53,8 +69,9 @@ def main():
             semgrep_pr_id=pull_requests[0].code_review_id
         )
 
-        semgrep_result = subprocess.run(semgrep_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        print(semgrep_result.stdout)
+        run_command(semgrep_command)
+        # semgrep_result = subprocess.run(semgrep_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        # print(semgrep_result.stdout)
     else:
         print(f"There are no open pull requests for the branch {source_branch}.")
         print(f"Running FULL scan.")
@@ -70,8 +87,9 @@ def main():
             semgrep_pr_id=pull_requests[0].code_review_id
         )
 
-        semgrep_result = subprocess.run(semgrep_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        print(semgrep_result.stdout)
+        run_command(semgrep_command)
+        # semgrep_result = subprocess.run(semgrep_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        # print(semgrep_result.stdout)
 
 if __name__ == "__main__":
     main()
