@@ -42,7 +42,7 @@ steps:
   path: self
 - script: |
     pip install azure-devops
-    python check_prs.py
+    python check_prs.py 
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     env
     echo "------------------------------------------------------------------------------"
