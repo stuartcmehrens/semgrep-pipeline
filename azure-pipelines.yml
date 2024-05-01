@@ -8,7 +8,7 @@ trigger:
 
 variables:
 - group: semgrep-variables
-  repoDisplayName: $[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')]
+- repoDisplayName: $[replace(variables['Build.Repository.Uri'], 'https://dev.azure.com/', '')]
   # projectName: $(System.TeamProject)
   # repoName: $(Build.Repository.Name)
   # repoDisplayName: $[format('{0}/{1}/{2}', variables['orgName'], variables['projectName'], variables['repoName'])]
