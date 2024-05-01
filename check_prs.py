@@ -1,7 +1,7 @@
 import os
 from azure.devops.connection import Connection
-from azure.devops.v6_0.git.git_client import GitClient
-from azure.devops.v6_0.git.models import GitPullRequestSearchCriteria
+from azure.devops.v7_0.git.git_client import GitClient
+from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria
 from msrest.authentication import BasicAuthentication
 
 def main():
