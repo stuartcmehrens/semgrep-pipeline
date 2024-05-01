@@ -48,6 +48,9 @@ pool:
 
 steps:
 - checkout: repo1
+  clean: true
+  fetchDepth: 20
+  persistCredentials: true
 - script: |
     docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
 
