@@ -52,7 +52,11 @@ steps:
   clean: true
   fetchDepth: 0
 - script: |
-    docker run -v "./:/src" -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
+    docker run \
+      -v "./:/src" \ 
+      -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
+      -e SEMGREP_REPO_DISPLAY_NAME="$(System.CollectionUri)/$(System.TeamProject)/$(Build.Repository.Name)" \
+      -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
     GIT_CREDENTIALS: $(System.AccessToken)  
