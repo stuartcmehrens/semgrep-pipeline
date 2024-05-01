@@ -6,6 +6,9 @@
 trigger:
 - none
 
+variables:
+- group: semgrep-variables
+
 resources:
   repositories:
   - repository: repo1
@@ -46,7 +49,7 @@ pool:
 steps:
 - checkout: repo1
 - script: |
-    docker run -i semgrep/semgrep semgrep --version
+    docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep --version
 
 
 # - checkout: repo2
