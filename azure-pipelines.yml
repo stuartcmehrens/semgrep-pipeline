@@ -45,22 +45,12 @@ steps:
     pip install azure-devops
     export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
     echo "------------------------------------------------------------------------------"
-    python self/check_prs.py 
     REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
-    echo "------------------------------------------------------------------------------"
-    echo "Running semgrep on $(Build.Repository.Name) from $(Build.Repository.Uri)"
-    echo "Repository Display Name: $REPO_DISPLAY_NAME"
-    echo "------------------------------------------------------------------------------"
+    python ../self/check_prs.py 
     env
-    cd repo
-    docker run \
-      -v "./:/src" \
-      -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
-      -e SEMGREP_REPO_DISPLAY_NAME="$REPO_DISPLAY_NAME" \
-      -i semgrep/semgrep semgrep ci
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
-    GIT_CREDENTIALS: $(System.AccessToken)  
+
 
 # - checkout: repo2
 # - script: |
@@ -68,3 +58,10 @@ steps:
 #     cat repo2/readme.md
 #     cat readme.md
 #   displayName: 'Run a cat'
+
+
+#    docker run \
+#       -v "./:/src" \
+#       -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) \
+#       -e SEMGREP_REPO_DISPLAY_NAME="$REPO_DISPLAY_NAME" \
+#       -i semgrep/semgrep semgrep ci
