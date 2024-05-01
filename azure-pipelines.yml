@@ -35,11 +35,11 @@ steps:
   persistCredentials: true
   clean: true
   fetchDepth: 0
-  path: repo
+  path: ./repo
 - checkout: self
   clean: true
   fetchDepth: 0
-  path: self
+  path: ./self
 - script: |
     ls -alh
     pip install azure-devops
