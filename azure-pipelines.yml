@@ -53,7 +53,7 @@ steps:
   persistCredentials: true
 - script: |
     ls -alh
-    git status
+    git checkout main
     docker run -e SEMGREP_APP_TOKEN=$(SEMGREP_APP_TOKEN) -i semgrep/semgrep semgrep ci
 
 
