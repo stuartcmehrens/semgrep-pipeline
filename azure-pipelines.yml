@@ -44,6 +44,7 @@ steps:
     cd /home/vsts/work/1
     pip install azure-devops
     export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
+    export BASLINE_REF=`cd repo && git merge-base HEAD`
     echo "------------------------------------------------------------------------------"
     export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     python ./self/check_prs.py 

@@ -62,11 +62,13 @@ def main():
             -e "SEMGREP_APP_TOKEN={semgrep_app_token}" \\
             -e "SEMGREP_REPO_DISPLAY_NAME={semgrep_repo_display_name}" \\
             -e "SEMGREP_PR_ID={semgrep_pr_id}" \\
+            -e "SEMGREP_BASELINE_REF={semgrep_baseline_ref}" \\
             -i semgrep/semgrep semgrep ci
         """.format(
             semgrep_app_token=os.environ['SEMGREP_APP_TOKEN'],
             semgrep_repo_display_name=os.environ['REPO_DISPLAY_NAME'],
-            semgrep_pr_id=pull_requests[0].code_review_id
+            semgrep_pr_id=pull_requests[0].code_review_id,
+            semgrep_baseline_ref=pull_requests[0].last_merge_target_commit.commit_id
         )
 
         run_command(semgrep_command)
