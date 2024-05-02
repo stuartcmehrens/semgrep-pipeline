@@ -42,11 +42,14 @@ steps:
   path: ./self
 - script: |
     cd /home/vsts/work/1
+    echo "------------------------------ dump env --------------------------------------"
+    env
+    echo "------------------------- install azure-devops -------------------------------"
     pip install azure-devops
+    echo "-------------------------- run semgrep scan ----------------------------------"
     export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
-    echo "------------------------------------------------------------------------------"
     export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
-    python ./self/check_prs.py
+    python ./self/semgrep_scan.py
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
 
