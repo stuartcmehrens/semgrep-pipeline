@@ -1,5 +1,6 @@
 import os
 import subprocess
+import sys
 from azure.devops.connection import Connection
 from azure.devops.v7_0.git.git_client import GitClient
 from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria
@@ -71,9 +72,8 @@ def main():
             semgrep_baseline_ref=pull_requests[0].last_merge_target_commit.commit_id
         )
 
-        run_command(semgrep_command)
-        # semgrep_result = subprocess.run(semgrep_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        # print(semgrep_result.stdout)
+        sys.exit(run_command(semgrep_command))
+
     else:
         print(f"There are no open pull requests for the branch {source_branch}.")
         print(f"Running FULL scan.")
@@ -89,9 +89,7 @@ def main():
             semgrep_pr_id=pull_requests[0].code_review_id
         )
 
-        run_command(semgrep_command)
-        # semgrep_result = subprocess.run(semgrep_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        # print(semgrep_result.stdout)
+        sys.exit(run_command(semgrep_command))
 
 if __name__ == "__main__":
     main()
