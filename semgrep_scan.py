@@ -3,8 +3,7 @@ import subprocess
 import sys
 from azure.devops.connection import Connection
 from azure.devops.v7_0.git.git_client import GitClient
-from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria
-from azure.devops.v7_0.git.models import GitPullRequestStatus
+from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread, CommentThreadStatus
 from msrest.authentication import BasicAuthentication
 
 def run_command(command):
@@ -71,6 +70,21 @@ def main():
     if pull_requests:
         print(f"There are {len(pull_requests)} open pull requests for the branch {source_branch}.")
         print(f"Running PR scan associated with the first PR: {pull_requests[0].code_review_id}")
+
+        thread = CommentThread(
+            comments=[Comment(
+                content="Semgrep scan is in progress",
+                comment_type="system"
+            )],
+            status=CommentThreadStatus.active
+        )
+
+        git_client.create_thread(
+            thread=thread,
+            repository_id=repo_id,
+            pull_request_id=pull_requests[0].pull_request_id,
+            project=project_name
+        )
 
         status = git_client.create_pull_request_status(
             status=scan_pending_status(build_url),
