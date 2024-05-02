@@ -47,9 +47,10 @@ steps:
     echo "------------------------- install azure-devops -------------------------------"
     pip install azure-devops
     echo "-------------------------- run semgrep scan ----------------------------------"
-    export SYSTEM_ACCESSTOKEN=$(System.AccessToken)
+    export 
     export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     python ./self/semgrep_scan.py
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
-
+    AZURE_TOKEN: $(AZURE_TOKEN)
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
