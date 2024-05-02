@@ -3,7 +3,7 @@ import subprocess
 import sys
 from azure.devops.connection import Connection
 from azure.devops.v7_0.git.git_client import GitClient
-from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread, CommentThreadStatus
+from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread
 from msrest.authentication import BasicAuthentication
 
 def run_command(command):
@@ -76,7 +76,7 @@ def main():
                 content="Semgrep scan is in progress",
                 comment_type="system"
             )],
-            status=CommentThreadStatus.active
+            status=1 # Active
         )
 
         git_client.create_thread(
