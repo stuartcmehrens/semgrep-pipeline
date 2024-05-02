@@ -23,12 +23,25 @@ def run_command(command):
     rc = process.poll()
     return rc
 
+def scan_pending_status(build_url):
+    return GitPullRequestStatus(
+        state="pending",  # or "failed", "pending"
+        description="Semgrep scan is in progress",
+        target_url=build_url,  # URL to the details of the build or status
+        context={
+            "name": "build",  # Context of the status (e.g., build, CI, approval)
+            "genre": "continuous-integration"
+        }
+    )
+
 def main():
     # Obtain the necessary variables from environment variables
     organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
     project_name = os.environ['BUILD_REPOSITORY_NAME']
     source_branch = os.environ['BUILD_SOURCEBRANCHNAME']
     system_access_token = os.environ['SYSTEM_ACCESSTOKEN']
+    repo_id = os.environ['BUILD_REPOSITORY_ID']
+    build_url = f"{organization_url}/{project_name}/_build/results?buildId={os.environ['BUILD_BUILDID']}"
 
     # Create a connection to Azure DevOps
     credentials = BasicAuthentication('', system_access_token)
@@ -58,6 +71,13 @@ def main():
     if pull_requests:
         print(f"There are {len(pull_requests)} open pull requests for the branch {source_branch}.")
         print(f"Running PR scan associated with the first PR: {pull_requests[0].code_review_id}")
+
+        status = git_client.create_pull_request_status(
+            status=scan_pending_status(build_url),
+            repository_id=repo_id,
+            pull_request_id=pull_requests[0].pull_request_id
+        )
+
         semgrep_command = """
         docker run \\
             -v "./repo:/src" \\
@@ -66,7 +86,7 @@ def main():
             -e "SEMGREP_PR_ID={semgrep_pr_id}" \\
             -e "SEMGREP_BASELINE_REF={semgrep_baseline_ref}" \\
             -e "SEMGREP_BRANCH={source_branch}" \\
-            -i semgrep/semgrep semgrep ci
+            -i semgrep/semgrep semgrep ci --json -o semgrep-results.json
         """.format(
             semgrep_app_token=os.environ['SEMGREP_APP_TOKEN'],
             semgrep_repo_display_name=os.environ['REPO_DISPLAY_NAME'],
@@ -85,7 +105,7 @@ def main():
             -v "./repo:/src" \\
             -e "SEMGREP_APP_TOKEN={semgrep_app_token}" \\
             -e "SEMGREP_REPO_DISPLAY_NAME={semgrep_repo_display_name}" \\
-            -i semgrep/semgrep semgrep ci
+            -i semgrep/semgrep semgrep ci --json -o semgrep-results.json
         """.format(
             semgrep_app_token=os.environ['SEMGREP_APP_TOKEN'],
             semgrep_repo_display_name=os.environ['REPO_DISPLAY_NAME'],
