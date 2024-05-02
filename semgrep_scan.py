@@ -80,9 +80,9 @@ def main():
         )
 
         git_client.create_thread(
-            thread=thread,
-            repository_id=repo_id,
-            pull_request_id=pull_requests[0].pull_request_id,
+            thread,
+            repo_id,
+            pull_requests[0].pull_request_id,
             project=project_name
         )
 
