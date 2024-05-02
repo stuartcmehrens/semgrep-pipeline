@@ -1,1 +1,1 @@
-git commit -am 'update pipe' && git push && cd ../repo1 && echo "y" >> file.txt && git commit -am 'update file' && git push && cd ../semgrep-pipeline
+git commit -am 'update pipe' ; git push ; cd ../repo1 ; echo "y" >> file.txt ; git commit -am 'update file' ; git push ; cd ../semgrep-pipeline
