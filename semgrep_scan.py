@@ -38,7 +38,7 @@ def main():
     organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
     project_name = os.environ['BUILD_REPOSITORY_NAME']
     source_branch = os.environ['BUILD_SOURCEBRANCHNAME']
-    system_access_token = os.environ['SYSTEM_ACCESSTOKEN']
+    system_access_token = os.environ['AZURE_TOKEN'] # instead of SYSTEM_ACCESSTOKEN
     repo_id = os.environ['BUILD_REPOSITORY_ID']
     build_url = f"{organization_url}/{project_name}/_build/results?buildId={os.environ['BUILD_BUILDID']}"
 
