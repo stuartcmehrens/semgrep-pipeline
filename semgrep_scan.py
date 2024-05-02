@@ -36,14 +36,15 @@ def scan_pending_status(build_url):
 def main():
     # Obtain the necessary variables from environment variables
     organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
-    project_name = os.environ['BUILD_REPOSITORY_NAME']
+    repo_project_name = os.environ['BUILD_REPOSITORY_NAME']
+    pipeline_project_name = os.environ['SYSTEM_TEAMPROJECT'] 
     source_branch = os.environ['BUILD_SOURCEBRANCHNAME']
-    system_access_token = os.environ['AZURE_TOKEN'] # instead of SYSTEM_ACCESSTOKEN
+    azure_access_token = os.environ['AZURE_TOKEN'] # instead of SYSTEM_ACCESSTOKEN
     repo_id = os.environ['BUILD_REPOSITORY_ID']
-    build_url = f"{organization_url}/{project_name}/_build/results?buildId={os.environ['BUILD_BUILDID']}"
+    build_url = f"{organization_url}/{pipeline_project_name}/_build/results?buildId={os.environ['BUILD_BUILDID']}"
 
     # Create a connection to Azure DevOps
-    credentials = BasicAuthentication('', system_access_token)
+    credentials = BasicAuthentication('', azure_access_token)
     connection = Connection(base_url=organization_url, creds=credentials)
 
     # Get a client (the Git client provides access to pull requests)
@@ -57,7 +58,7 @@ def main():
 
     # List pull requests
     pull_requests = git_client.get_pull_requests_by_project(
-        project=project_name,
+        project=repo_project_name,
         search_criteria=search_criteria
     )
 
@@ -83,7 +84,7 @@ def main():
             thread,
             repo_id,
             pull_requests[0].pull_request_id,
-            project=project_name
+            project=repo_project_name
         )
 
         status = git_client.create_pull_request_status(
