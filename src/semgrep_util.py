@@ -38,7 +38,10 @@ def diff_scan(pr):
             repo_url = pr.repository.web_url
         )
     
-    return run_command(semgrep_command)
+    semgrep_return_code = run_command(semgrep_command)
+    run_command(f"pwd")
+    run_command(f"ls -alh")
+    return semgrep_return_code
 
 def full_scan():
     semgrep_command = """
@@ -51,5 +54,10 @@ def full_scan():
             semgrep_app_token=os.environ['SEMGREP_APP_TOKEN'],
             semgrep_repo_display_name=os.environ['REPO_DISPLAY_NAME']
         )
+    
+    
+    semgrep_return_code = run_command(semgrep_command)
+    run_command(f"pwd")
+    run_command(f"ls -alh")
 
-    return run_command(semgrep_command)
+    return semgrep_return_code

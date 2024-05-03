@@ -29,13 +29,12 @@ def main():
         else:
             pr_ending_status = azure.add_pr_status(pr, "failed")
         
-
     else:
         print(f"There are no open pull requests for the branch {pr.source_branch}.")
         print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
 
-    with open('semgrep-results.json') as f:
+    with open('../semgrep-results.json') as f:
         semgrep_results = json.load(f)
         for finding in semgrep_results['results']:
             print(finding)
