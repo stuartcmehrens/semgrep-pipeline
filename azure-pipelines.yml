@@ -49,7 +49,7 @@ steps:
     echo "-------------------------- run semgrep scan ----------------------------------"
     export 
     export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
-    python ./self/semgrep_scan.py
+    python ./self/src/semgrep_scan.py
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
     AZURE_TOKEN: $(AZURE_TOKEN)
