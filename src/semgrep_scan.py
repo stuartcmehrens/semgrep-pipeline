@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 
 import azure_util as azure
 import semgrep_util as semgrep
@@ -13,6 +14,7 @@ def log_start():
 def main():
     log_start()
     pull_requests = azure.get_prs()
+    semgrep_exit_code = 0
 
     if pull_requests:
         pr = pull_requests[0]
@@ -27,13 +29,18 @@ def main():
         else:
             pr_ending_status = azure.add_pr_status(pr, "failed")
         
-        sys.exit(semgrep_exit_code)
+
     else:
         print(f"There are no open pull requests for the branch {pr.source_branch}.")
         print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
-        sys.exit(semgrep_exit_code)
 
+    with open('semgrep-results.json') as f:
+        semgrep_results = json.load(f)
+        for finding in semgrep_results['results']:
+            print(finding)
+
+    sys.exit(semgrep_exit_code)
 
 if __name__ == "__main__":
     main()
