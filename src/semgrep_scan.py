@@ -21,14 +21,19 @@ def main():
         print(f"There are {len(pull_requests)} open pull requests for the branch {pr.source_branch}.")
         print(f"Running PR scan associated with the first PR: {pr.code_review_id}")
         
-        pr_pending_status = azure.add_pr_status_pending(pr)
+        pr_pending_status = azure.add_pr_status(pr, "pending")
         semgrep_exit_code = semgrep.diff_scan(pr)
-        pr_ending_status = azure.add_pr_scan_completed(pr, semgrep_exit_code)
-
+        if (semgrep_exit_code == 0):
+            pr_ending_status = azure.add_pr_status(pr, "completed")
+        else:
+            pr_ending_status = azure.add_pr_status(pr, "failed")
+        
+        sys.exit(semgrep_exit_code)
     else:
         print(f"There are no open pull requests for the branch {pr.source_branch}.")
         print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
+        sys.exit(semgrep_exit_code)
 
 
 if __name__ == "__main__":
