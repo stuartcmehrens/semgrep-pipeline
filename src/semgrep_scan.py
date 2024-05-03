@@ -28,16 +28,26 @@ def main():
             pr_ending_status = azure.add_pr_status(pr, "completed")
         else:
             pr_ending_status = azure.add_pr_status(pr, "failed")
+
+        with open('./repo/semgrep-results.json') as f:
+            semgrep_results = json.load(f)
+            for finding in semgrep_results['results']:
+                print(finding)
+                azure.add_inline_comment(pr,{
+                    "message": finding['extra']['message'],
+                    "path": finding['path'],
+                    "line-start": finding['start']['line'],
+                    "line-start-offset": finding['start']['col'],
+                    "line-end": finding['end']['line'],
+                    "line-end-offset": finding['end']['col'],
+                })
         
     else:
         print(f"There are no open pull requests for the branch {pr.source_branch}.")
         print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
 
-    with open('./repo/semgrep-results.json') as f:
-        semgrep_results = json.load(f)
-        for finding in semgrep_results['results']:
-            print(finding)
+
 
     sys.exit(semgrep_exit_code)
 

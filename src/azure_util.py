@@ -3,7 +3,7 @@ import re
 
 from azure.devops.connection import Connection
 from azure.devops.v7_0.git.git_client import GitClient
-from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread
+from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread, CommentThreadContext, CommentPosition
 from msrest.authentication import BasicAuthentication
 
 # globally scope the boilerplate vars
@@ -99,17 +99,45 @@ def get_prs():
 
 def add_comment(pr):
     print("todo")
-    # thread = CommentThread(
-    #     comments=[Comment(
-    #         content="Semgrep scan is in progress",
-    #         comment_type="system"
-    #     )],
-    #     status=1 # Active
-    # )
+    thread = CommentThread(
+        comments=[Comment(
+            content="Semgrep scan is in progress",
+            comment_type="system"
+        )],
+        status=1 # Active
+    )
 
-    # git_client.create_thread(
-    #     thread,
-    #     repo_id,
-    #     pr.pull_request_id,
-    #     project=repo_project_name
-    # )
+    git_client.create_thread(
+        thread,
+        repo_id,
+        pr.pull_request_id,
+        project=repo_project_name
+    )
+
+def add_inline_comment(pr, comment):
+    print("todo")
+    thread = CommentThread(
+        comments=[Comment(
+            content=comment['message'],
+            comment_type="text"
+        )],
+        status=1, # Active
+        thread_context=CommentThreadContext(
+            file_path=comment['path'],
+            right_file_start=CommentPosition(
+                line=comment['line-start'],
+                offset=comment['line-start-offset']
+            ),
+            right_file_end=CommentPosition(
+                line=comment['line-end'],
+                offset=comment['line-end-offset']
+            )
+        )
+    )
+
+    git_client.create_thread(
+        thread,
+        repo_id,
+        pr.pull_request_id,
+        project=repo_project_name
+    )
