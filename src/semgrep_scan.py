@@ -34,7 +34,7 @@ def main():
         print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
 
-    with open('../semgrep-results.json') as f:
+    with open('./repo/semgrep-results.json') as f:
         semgrep_results = json.load(f)
         for finding in semgrep_results['results']:
             print(finding)
