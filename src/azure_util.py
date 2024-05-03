@@ -123,7 +123,7 @@ def add_inline_comment(pr, comment):
         )],
         status=1, # Active
         thread_context=CommentThreadContext(
-            file_path=comment['path'],
+            file_path=f"/{comment['path']}",
             right_file_start=CommentPosition(
                 line=comment['line-start'],
                 offset=comment['line-start-offset']
