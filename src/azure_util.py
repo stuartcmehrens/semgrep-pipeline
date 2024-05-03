@@ -1,4 +1,5 @@
 import os
+import re
 
 from azure.devops.connection import Connection
 from azure.devops.v7_0.git.git_client import GitClient
@@ -12,6 +13,7 @@ organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
 repo_id = os.environ['BUILD_REPOSITORY_ID']
 repo_project_name = os.environ['BUILD_REPOSITORY_NAME']
 repo_branch = os.environ['BUILD_SOURCEBRANCHNAME']
+repo_url = re.sub(r"https://.*?@dev\.azure\.com", "https://dev.azure.com", os.environ['BUILD_REPOSITORY_URI'])
 
 pipeline_project_name = os.environ['SYSTEM_TEAMPROJECT'] 
 pipeline_url = f"{organization_url}/{pipeline_project_name}/_build/results?buildId={os.environ['BUILD_BUILDID']}"
@@ -91,7 +93,7 @@ def get_prs():
 
     for pr in prs:
         pr.source_branch = pr.source_ref_name.split('/')[-1]
-    
+        pr.repository.web_url = repo_url
     return prs
 
 

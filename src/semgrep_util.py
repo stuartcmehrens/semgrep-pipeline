@@ -27,13 +27,15 @@ def diff_scan(pr):
             -e "SEMGREP_PR_ID={semgrep_pr_id}" \\
             -e "SEMGREP_BASELINE_REF={semgrep_baseline_ref}" \\
             -e "SEMGREP_BRANCH={source_branch}" \\
+            -e "SEMGREP_REPO_URL={repo_url}" \\
             -i semgrep/semgrep semgrep ci --json -o semgrep-results.json
         """.format(
             semgrep_app_token = os.environ['SEMGREP_APP_TOKEN'],
             semgrep_repo_display_name = os.environ['REPO_DISPLAY_NAME'],
             semgrep_pr_id = pr.code_review_id,
             semgrep_baseline_ref = pr.last_merge_target_commit.commit_id,
-            source_branch = source_branch
+            source_branch = source_branch,
+            repo_url = pr.repository.web_url
         )
     
     return run_command(semgrep_command)
