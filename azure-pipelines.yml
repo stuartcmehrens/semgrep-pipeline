@@ -31,16 +31,16 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: $(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/.*?/||' | sed 's|_git/||')
-  persistCredentials: true
+- checkout: repo1/repo1
   clean: true
   fetchDepth: 0
   path: ./repo
 - checkout: self
+  persistCredentials: true
   clean: true
   fetchDepth: 0
   path: ./self
-- script: |
+- script: | 
     cd /home/vsts/work/1
     echo "------------------------------ dump env --------------------------------------"
     env
