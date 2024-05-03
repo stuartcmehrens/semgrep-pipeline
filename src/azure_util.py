@@ -95,9 +95,6 @@ def get_prs():
     return prs
 
 
-
-
-
 def add_comment(pr):
     print("todo")
     # thread = CommentThread(
