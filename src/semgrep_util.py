@@ -39,9 +39,6 @@ def diff_scan(pr):
         )
     
     semgrep_return_code = run_command(semgrep_command)
-    run_command(f"pwd")
-    run_command(f"ls -alh")
-    
     return semgrep_return_code
 
 def full_scan():
@@ -56,9 +53,5 @@ def full_scan():
             semgrep_repo_display_name=os.environ['REPO_DISPLAY_NAME']
         )
     
-    
     semgrep_return_code = run_command(semgrep_command)
-    run_command(f"pwd")
-    run_command(f"ls -alh")
-
     return semgrep_return_code

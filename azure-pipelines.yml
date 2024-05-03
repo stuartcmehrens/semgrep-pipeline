@@ -31,7 +31,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: repo1/repo1
+- checkout: $(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/.*?/||' | sed 's|_git/||')
   persistCredentials: true
   clean: true
   fetchDepth: 0
