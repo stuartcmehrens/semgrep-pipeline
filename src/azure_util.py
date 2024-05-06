@@ -96,6 +96,12 @@ def get_prs():
         pr.repository.web_url = repo_url
     return prs
 
+def get_comment_threads(pr):
+    return git_client.get_threads(
+        repo_id,
+        pr.pull_request_id,
+        project=repo_project_name
+    )
 
 def add_comment(pr):
     print("todo")
