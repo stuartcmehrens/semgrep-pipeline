@@ -47,7 +47,6 @@ steps:
     echo "------------------------- install azure-devops -------------------------------"
     pip install azure-devops
     echo "-------------------------- run semgrep scan ----------------------------------"
-    export 
     export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     python ./self/src/semgrep_scan.py
   env:

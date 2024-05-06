@@ -2,8 +2,9 @@ import os
 import sys
 import json
 
-import azure_util as azure
-import semgrep_util as semgrep
+import util.azure as azure
+import util.semgrep_scan as semgrep
+import util.semgrep_finding as futil
 
 def log_start():
     print(f"------------------------------------------------------------------------------")
@@ -24,6 +25,7 @@ def main():
         
         pr_pending_status = azure.add_pr_status(pr, "pending")
         semgrep_exit_code = semgrep.diff_scan(pr)
+
         if (semgrep_exit_code == 0):
             pr_ending_status = azure.add_pr_status(pr, "completed")
         else:
@@ -33,13 +35,14 @@ def main():
             semgrep_results = json.load(f)
             for finding in semgrep_results['results']:
                 print(finding)
+                _group_key = futil.group_key(finding, {"name": os.environ['REPO_DISPLAY_NAME']})
                 azure.add_inline_comment(pr,{
-                    "message": finding['extra']['message'],
-                    "path": finding['path'],
-                    "line-start": finding['start']['line'],
-                    "line-start-offset": finding['start']['col'],
-                    "line-end": finding['end']['line'],
-                    "line-end-offset": finding['end']['col'],
+                    "message": futil.message(finding) + "\n\n<!--" + json.dumps({"key": _group_key}) + "-->",
+                    "path": futil.path(finding),
+                    "line-start": futil.start_line(finding),
+                    "line-start-offset": futil.start_line_col(finding),
+                    "line-end": futil.end_line(finding),
+                    "line-end-offset": futil.end_line_col(finding),
                 })
         
     else:
