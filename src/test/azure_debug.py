@@ -2,7 +2,7 @@ import sys
 sys.path.append('/Users/david/code/azure-devops/semgrep-pipeline/src/')
 
 import json
-import azure_util as azure
+import util.azure as azure
 import re
 
 def parse_embedded_json(large_str):
@@ -28,7 +28,7 @@ def parse_embedded_json(large_str):
 prs = azure.get_prs()
 threads = azure.get_comment_threads(prs[0])
 thread = threads[-1]
-comment_data = parse_embedded_json(thread.comments[0].content)
+comment_data = [parse_embedded_json(comment.content) for comment in thread.comments]
 
 
 print(thread)
