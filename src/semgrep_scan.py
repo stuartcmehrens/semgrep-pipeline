@@ -19,10 +19,11 @@ def main():
 
     if pull_requests:
         pr = pull_requests[0]
+        print(f"Running diff scan for changes on branch {pr.source_branch} from commit {pr.}.")
+        print(f"New findings configured to comment/block will post to PRs:")
+        for pr in pull_requests:
+            print(f"  - {pr.code_review_id}")
 
-        print(f"There are {len(pull_requests)} open pull requests for the branch {pr.source_branch}.")
-        print(f"Running PR scan associated with the first PR: {pr.code_review_id}")
-        
         pr_pending_status = azure.add_pr_status(pr, "pending")
         semgrep_exit_code = semgrep.diff_scan(pr)
 
@@ -36,8 +37,9 @@ def main():
             for finding in semgrep_results['results']:
                 print(finding)
                 _group_key = futil.group_key(finding, {"name": os.environ['REPO_DISPLAY_NAME']})
+
                 azure.add_inline_comment(pr,{
-                    "message": futil.message(finding) + "\n\n<!--" + json.dumps({"key": _group_key}) + "-->",
+                    "message": futil.message(finding) + "\n\n<!--" + json.dumps({"group_key": _group_key}) + "-->",
                     "path": futil.path(finding),
                     "line-start": futil.start_line(finding),
                     "line-start-offset": futil.start_line_col(finding),

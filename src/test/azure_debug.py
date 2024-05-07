@@ -7,7 +7,7 @@ import re
 
 def parse_embedded_json(large_str):
     # Use regular expression to find the JSON string within HTML comments
-    pattern = r"<!--'(\{.*?\})'-->"
+    pattern = r"<!--(\{.*?\})-->"
     match = re.search(pattern, large_str)
     
     if match:
@@ -27,8 +27,11 @@ def parse_embedded_json(large_str):
 
 prs = azure.get_prs()
 threads = azure.get_comment_threads(prs[0])
-thread = threads[-1]
-comment_data = [parse_embedded_json(comment.content) for comment in thread.comments]
+comment_data = []
+
+for thread in threads:
+    for comment in thread.comments:
+        comment_data.append(parse_embedded_json(comment.content))
 
 
 print(thread)
