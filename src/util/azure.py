@@ -15,6 +15,7 @@ organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
 
 repo_id = os.environ['BUILD_REPOSITORY_ID']
 repo_project_name = re.search(r'azure\.com/[^/]+/([^/]+)/', os.environ['BUILD_REPOSITORY_URI']).group(1)
+repo_name = os.environ['BUILD_REPOSITORY_NAME']
 repo_branch = os.environ['BUILD_SOURCEBRANCHNAME']
 repo_url = re.sub(r"https://.*?@dev\.azure\.com", "https://dev.azure.com", os.environ['BUILD_REPOSITORY_URI'])
 
@@ -123,8 +124,9 @@ def add_comment(pr):
         project=repo_project_name
     )
 
-def add_inline_comment(pr, comment):
-    print("todo")
+def add_inline_comment(pr, finding):
+    comment = comment_from_finding(finding)
+
     thread = CommentThread(
         comments=[Comment(
             content=comment['message'],
@@ -134,12 +136,12 @@ def add_inline_comment(pr, comment):
         thread_context=CommentThreadContext(
             file_path=f"/{comment['path']}",
             right_file_start=CommentPosition(
-                line=comment['line-start'],
-                offset=comment['line-start-offset']
+                line=comment['start-line'],
+                offset=comment['start-line-col']
             ),
             right_file_end=CommentPosition(
-                line=comment['line-end'],
-                offset=comment['line-end-offset']
+                line=comment['end-line'],
+                offset=comment['end-line-col']
             )
         )
     )
@@ -152,13 +154,13 @@ def add_inline_comment(pr, comment):
     )
 
 def comment_from_finding(finding):
-    group_key = futil.group_key(finding, {"name": repo_project_name})
+    group_key = futil.group_key(finding, {"name": repo_name})
 
     return {
         "message": futil.message(finding) + "\n\n<!--" + json.dumps({"group_key": group_key}) + "-->",
         "path": futil.path(finding),
-        "line-start": futil.start_line(finding),
-        "line-start-offset": futil.start_line_col(finding),
-        "line-end": futil.end_line(finding),
-        "line-end-offset": futil.end_line_col(finding),
+        "start-line": futil.start_line(finding),
+        "start-line-col": futil.start_line_col(finding),
+        "end-line": futil.end_line(finding),
+        "end-line-col": futil.end_line_col(finding),
     }

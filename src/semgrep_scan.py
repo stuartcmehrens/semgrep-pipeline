@@ -36,9 +36,7 @@ def main():
                 semgrep_results = json.load(f)
                 for finding in semgrep_results['results']:
                     print(finding)
-                    _group_key = futil.group_key(finding, {"name": os.environ['REPO_DISPLAY_NAME']})
-
-                    azure.add_inline_comment(pr,)
+                    azure.add_inline_comment(pr, finding)
         
     else:
         print(f"There are no open pull requests for the branch.")
