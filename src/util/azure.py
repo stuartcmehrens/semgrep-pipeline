@@ -164,3 +164,31 @@ def comment_from_finding(finding):
         "end-line": futil.end_line(finding),
         "end-line-col": futil.end_line_col(finding),
     }
+
+def parse_comment_json(comment):
+    pattern = r"<!--(\{.*?\})-->"
+    match = re.search(pattern, comment.content)
+    
+    if match:
+        json_str = match.group(1)
+        try:
+            data = json.loads(json_str)
+            return data
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON: {e}")
+            return {}
+    else:
+        print("No JSON string found in the input.")
+        return {}
+    
+def get_pr_existing_keys(pr):
+    threads = get_comment_threads(pr)
+    keys = []
+
+    for thread in threads:
+        for comment in thread.comments:
+            parsed_content = parse_comment_json(comment)
+            if 'group_key' in parsed_content:
+                keys.append(parsed_content.get('group_key'))
+    
+    return keys
