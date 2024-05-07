@@ -49,6 +49,8 @@ steps:
     echo "-------------------------- run semgrep scan ----------------------------------"
     export REPO_DISPLAY_NAME=$(echo "$(Build.Repository.Uri)" | sed 's|.*dev.azure.com/||' | sed 's|_git/||')
     python ./self/src/semgrep_scan.py
+    echo "---- ls -alh /home/vsts/work/1/repo/ ----"
+    ls -alh /home/vsts/work/1/repo/
   env:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
     AZURE_TOKEN: $(AZURE_TOKEN)
