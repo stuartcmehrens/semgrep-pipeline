@@ -1,10 +1,13 @@
 import os
 import re
+import json
 
 from azure.devops.connection import Connection
 from azure.devops.v7_0.git.git_client import GitClient
 from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread, CommentThreadContext, CommentPosition
 from msrest.authentication import BasicAuthentication
+
+import util.semgrep_finding as futil
 
 # globally scope the boilerplate vars
 azure_access_token = os.environ['AZURE_TOKEN'] # of your bot account
@@ -147,3 +150,15 @@ def add_inline_comment(pr, comment):
         pr.pull_request_id,
         project=repo_project_name
     )
+
+def comment_from_finding(finding):
+    group_key = futil.group_key(finding, {"name": repo_project_name})
+    
+    return {
+        "message": futil.message(finding) + "\n\n<!--" + json.dumps({"group_key": group_key}) + "-->",
+        "path": futil.path(finding),
+        "line-start": futil.start_line(finding),
+        "line-start-offset": futil.start_line_col(finding),
+        "line-end": futil.end_line(finding),
+        "line-end-offset": futil.end_line_col(finding),
+    }

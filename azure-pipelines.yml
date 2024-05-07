@@ -11,9 +11,9 @@ variables:
 
 resources:
   repositories:
-  - repository: repo1/repo1
+  - repository: project1/repo1
     type: git
-    name: repo1/repo1
+    name: project1/repo1
     trigger:
       branches:
         include:
@@ -31,7 +31,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: repo1/repo1
+- checkout: project1/repo1
   clean: true
   fetchDepth: 0
   path: ./repo
