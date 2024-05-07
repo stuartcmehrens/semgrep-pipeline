@@ -58,3 +58,4 @@ steps:
     targetPath: './repo/semgrep_results.json'
     artifact: 'semgrep_results'
     publishLocation: 'pipeline'
+  condition: always()
