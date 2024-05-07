@@ -57,7 +57,7 @@ steps:
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '/home/vsts/work/1/repo/semgrep_results.json'
-    artifact: 'semgrep_results'
+    targetPath: '/home/vsts/work/1/repo/semgrep-results.json'
+    artifact: 'semgrep-results'
     publishLocation: 'pipeline'
   condition: always()

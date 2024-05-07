@@ -8,22 +8,17 @@ import re
 
 
 prs = azure.get_prs()
-keys = azure.get_pr_existing_keys(prs[0])
+pr = prs[0]
+# keys = azure.get_pr_existing_keys(prs[0])
 
-
-
+with open('/Users/david/code/azure-devops/semgrep-pipeline/src/test/data/findings-r1pr1.json') as f:
+    semgrep_results = json.load(f)
+    for finding in semgrep_results['results']:
+        if not azure.has_existing_comment(pr, finding):
+            print(f"Posting to PR #{pr.code_review_id} comment for new finding: {finding}")
+            azure.add_inline_comment(pr, finding)  
 
 print(prs)
 
 
 
-
-
-# # Get a client for identity management (assuming the client supports the required methods)
-# identity_client = connection.clients.get_identity_client()
-
-# # Query for the identity details
-# identity_guid = 'Build\99bf41a9-343b-4707-baad-0349de5de113'
-# identity = identity_client.read_identity(identity_id=identity_guid)
-
-# print(identity)
