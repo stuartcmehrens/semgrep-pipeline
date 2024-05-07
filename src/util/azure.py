@@ -14,7 +14,7 @@ azure_access_token = os.environ['AZURE_TOKEN'] # of your bot account
 organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
 
 repo_id = os.environ['BUILD_REPOSITORY_ID']
-repo_project_name = os.environ['BUILD_REPOSITORY_NAME']
+repo_project_name = re.search(r'azure\.com/[^/]+/([^/]+)/', os.environ['BUILD_REPOSITORY_URI']).group(1)
 repo_branch = os.environ['BUILD_SOURCEBRANCHNAME']
 repo_url = re.sub(r"https://.*?@dev\.azure\.com", "https://dev.azure.com", os.environ['BUILD_REPOSITORY_URI'])
 
@@ -153,7 +153,7 @@ def add_inline_comment(pr, comment):
 
 def comment_from_finding(finding):
     group_key = futil.group_key(finding, {"name": repo_project_name})
-    
+
     return {
         "message": futil.message(finding) + "\n\n<!--" + json.dumps({"group_key": group_key}) + "-->",
         "path": futil.path(finding),
