@@ -19,7 +19,7 @@ def main():
 
     if pull_requests:
         pr = pull_requests[0]
-        print(f"Running diff scan for changes on branch {pr.source_branch} from commit {pr.}.")
+        print(f"Running diff scan for changes on branch {pr.source_branch} from commit {pr.last_merge_target_commit.commit_id}.")
         print(f"New findings configured to comment/block will post to PRs:")
         for pr in pull_requests:
             print(f"  - {pr.code_review_id}")
