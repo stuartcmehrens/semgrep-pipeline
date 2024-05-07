@@ -31,7 +31,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- checkout: project1/repo1
+- checkout: repo2/repo2
   clean: true
   fetchDepth: 0
   path: ./repo

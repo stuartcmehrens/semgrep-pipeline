@@ -44,8 +44,6 @@ def main():
         print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
 
-
-
     sys.exit(semgrep_exit_code)
 
 if __name__ == "__main__":

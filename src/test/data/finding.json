@@ -1,0 +1,105 @@
+{
+    "check_id": "java.lang.security.audit.cookie-missing-secure-flag.cookie-missing-secure-flag",
+    "end": {
+        "col": 33,
+        "line": 8,
+        "offset": 322
+    },
+    "extra": {
+        "engine_kind": "PRO",
+        "fingerprint": "310269478cbbb554aa6b7ac03d4f6e3a9b085ebef072c3336fbd49b9641487c038e7930b4946a3a2fe3daa918ac4b54c7c5d5870a3bc7ae3f266ec5c3117e731_0",
+        "is_ignored": false,
+        "lines": "        cookie.setSecure(false);",
+        "message": "A cookie was detected without setting the \'secure\' flag. The \'secure\' flag for cookies prevents the client from transmitting the cookie over insecure channels such as HTTP. Set the \'secure\' flag by calling \'cookie.setSecure(true);\'",
+        "metadata": {
+            "asvs": {
+                "control_id": "3.4.1 Missing Cookie Attribute",
+                "control_url": "https://github.com/OWASP/ASVS/blob/master/4.0/en/0x12-V3-Session-management.md#v34-cookie-based-session-management",
+                "section": "V3: Session Management Verification Requirements",
+                "version": "4"
+            },
+            "category": "security",
+            "confidence": "LOW",
+            "cwe": ["CWE-614: Sensitive Cookie in HTTPS Session Without \'Secure\' Attribute"
+            ],
+            "dev.semgrep.actions": [
+                "monitor"
+            ],
+            "impact": "LOW",
+            "license": "Commons Clause License Condition v1.0[LGPL-2.1-only]",
+            "likelihood": "LOW",
+            "owasp": [
+                "A05:2021 - Security Misconfiguration"
+            ],
+            "references": [
+                "https://owasp.org/Top10/A05_2021-Security_Misconfiguration"
+            ],
+            "semgrep.dev": {
+                "rule": {
+                    "origin": "community",
+                    "r_id": 9172,
+                    "rule_id": "L1Uyvp",
+                    "rule_name": "java.lang.security.audit.cookie-missing-secure-flag.cookie-missing-secure-flag",
+                    "rv_id": 109688,
+                    "url": "https://semgrep.dev/playground/r/GxTv63G/java.lang.security.audit.cookie-missing-secure-flag.cookie-missing-secure-flag",
+                    "version_id": "GxTv63G"
+                },
+                "src": "unchanged"
+            },
+            "semgrep.policy": {
+                "id": 53434,
+                "name": "Rule Board - Audit column",
+                "slug": "rule-board-audit"
+            },
+            "semgrep.url": "https://semgrep.dev/r/java.lang.security.audit.cookie-missing-secure-flag.cookie-missing-secure-flag",
+            "shortlink": "https://sg.run/kXoK",
+            "source": "https://semgrep.dev/r/java.lang.security.audit.cookie-missing-secure-flag.cookie-missing-secure-flag",
+            "source-rule-url": "https://find-sec-bugs.github.io/bugs.htm#INSECURE_COOKIE",
+            "subcategory": [
+                "audit"
+            ],
+            "technology": [
+                "java"
+            ],
+            "vulnerability_class": [
+                "Cookie Security"
+            ]
+        },
+        "metavars": {
+            "$COOKIE": {
+                "abstract_content": "cookie",
+                "end": {
+                    "col": 15,
+                    "line": 8,
+                    "offset": 304
+                },
+                "propagated_value": {
+                    "svalue_abstract_content": "new Cookie(\\"cookie\\"value)",
+                    "svalue_end": {
+                        "col": 52,
+                        "line": 6,
+                        "offset": 244
+                    },
+                    "svalue_start": {
+                        "col": 25,
+                        "line": 6,
+                        "offset": 217
+                    }
+                },
+                "start": {
+                    "col": 9,
+                    "line": 8,
+                    "offset": 298
+                }
+            }
+        },
+        "severity": "WARNING",
+        "validation_state": "NO_VALIDATOR"
+    },
+    "path": "cookie.java",
+    "start": {
+        "col": 9,
+        "line": 8,
+        "offset": 298
+    }
+}
