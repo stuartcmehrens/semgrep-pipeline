@@ -53,3 +53,8 @@ steps:
     SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
     AZURE_TOKEN: $(AZURE_TOKEN)
     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: './repo/semgrep_results.json'
+    artifact: 'semgrep_results'
+    publishLocation: 'pipeline'
