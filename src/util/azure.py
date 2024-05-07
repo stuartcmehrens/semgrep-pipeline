@@ -192,3 +192,8 @@ def get_pr_existing_keys(pr):
                 keys.append(parsed_content.get('group_key'))
     
     return keys
+
+def has_existing_comment(pr, finding):
+    group_key = futil.group_key(finding, {"name": repo_name})
+    existing_keys = get_pr_existing_keys(pr)
+    return group_key in existing_keys

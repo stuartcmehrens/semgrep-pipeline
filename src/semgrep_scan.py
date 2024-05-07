@@ -32,13 +32,12 @@ def main():
             else:
                 pr_ending_status = azure.add_pr_status(pr, "failed")
 
-            semgrep_comment_keys = azure.get_pr_existing_keys(pr)
-
             with open('./repo/semgrep-results.json') as f:
                 semgrep_results = json.load(f)
                 for finding in semgrep_results['results']:
-                    print(finding)
-                    azure.add_inline_comment(pr, finding) if futil.group_key(finding) not in semgrep_comment_keys else None
+                    if (azure.has_existing_comment(pr, finding)):
+                        print(f"Posting to PR #{pr.code_review_id} comment for new finding: {finding}")
+                        azure.add_inline_comment(pr, finding)  
         
     else:
         print(f"There are no open pull requests for the branch.")
