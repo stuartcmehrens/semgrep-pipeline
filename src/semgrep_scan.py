@@ -35,7 +35,7 @@ def main():
             with open('./repo/semgrep-results.json') as f:
                 semgrep_results = json.load(f)
                 for finding in semgrep_results['results']:
-                    if (azure.has_existing_comment(pr, finding)):
+                    if not azure.has_existing_comment(pr, finding):
                         print(f"Posting to PR #{pr.code_review_id} comment for new finding: {finding}")
                         azure.add_inline_comment(pr, finding)  
         

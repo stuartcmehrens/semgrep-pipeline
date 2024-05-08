@@ -107,7 +107,7 @@ def get_comment_threads(pr):
         project=repo_project_name
     )
 
-def add_comment(pr):
+def add_comment(pr, finding):
     print("todo")
     thread = CommentThread(
         comments=[Comment(
@@ -153,11 +153,19 @@ def add_inline_comment(pr, finding):
         project=repo_project_name
     )
 
-def comment_from_finding(finding):
+def hidden_group_key(finding):
     group_key = futil.group_key(finding, {"name": repo_name})
+    return f"\n\n<!--{json.dump({"group_key": group_key})}-->"
+
+def comment_from_finding(finding):
+    message = (
+        futil.finding_to_cwe_brief(finding) + "\n\n" + 
+        futil.message(finding) +
+        hidden_group_key(finding)
+    )
 
     return {
-        "message": futil.message(finding) + "\n\n<!--" + json.dumps({"group_key": group_key}) + "-->",
+        "message": message,
         "path": futil.path(finding),
         "start-line": futil.start_line(finding),
         "start-line-col": futil.start_line_col(finding),
