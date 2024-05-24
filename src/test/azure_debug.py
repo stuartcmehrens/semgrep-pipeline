@@ -11,7 +11,7 @@ prs = azure.get_prs()
 pr = prs[0]
 # keys = azure.get_pr_existing_keys(prs[0])
 
-with open('/Users/david/code/azure-devops/semgrep-pipeline/src/test/data/findings-r1pr1.json') as f:
+with open('/Users/david/code/azure-devops/semgrep-pipeline/src/test/data/cookie.json') as f:
     semgrep_results = json.load(f)
     for finding in semgrep_results['results']:
         if not azure.has_existing_comment(pr, finding):

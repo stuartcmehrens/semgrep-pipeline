@@ -153,15 +153,34 @@ def add_inline_comment(pr, finding):
         project=repo_project_name
     )
 
-def hidden_group_key(finding):
+def comment_hidden_group_key(finding):
     group_key = futil.group_key(finding, {"name": repo_name})
-    return f"\n\n<!--{json.dump({"group_key": group_key})}-->"
+    hidden_data = json.dumps({"group_key": group_key})
+    return f"\n\n<!--{hidden_data}-->"
+
+def comment_references(finding):
+    references = (
+        "### References\n" +
+        " - [Semgrep Rule](" + futil.semgrep_url(finding) + ")"
+    )
+
+    for ref in futil.reference_links(finding):
+        references += f"\n - [{ref}]({ref})"
+
+    return references
+
+def comment_summary(finding):
+    return (
+        f"### Potential {futil.severity(finding)} Severity Risk\n" +
+        futil.finding_to_issue_summary(finding) + "\n\n" + 
+        futil.message(finding)
+    )
 
 def comment_from_finding(finding):
     message = (
-        futil.finding_to_cwe_brief(finding) + "\n\n" + 
-        futil.message(finding) +
-        hidden_group_key(finding)
+        comment_summary(finding) + "\n" +
+        comment_references(finding) +
+        comment_hidden_group_key(finding)
     )
 
     return {
@@ -174,19 +193,20 @@ def comment_from_finding(finding):
     }
 
 def parse_comment_json(comment):
-    pattern = r"<!--(\{.*?\})-->"
-    match = re.search(pattern, comment.content)
+    try:
+        pattern = r"<!--(\{.*?\})-->"
+        match = re.search(pattern, comment.content)
     
-    if match:
-        json_str = match.group(1)
-        try:
+        if match:
+            json_str = match.group(1)
             data = json.loads(json_str)
             return data
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
+        else:
+            print("No JSON string found in the input.")
             return {}
-    else:
-        print("No JSON string found in the input.")
+    except Exception as e:
+        print(f"Error parsing comment JSON: {e}")
+        print(f"    - Comment: {comment}")
         return {}
     
 def get_pr_existing_keys(pr):

@@ -2,26 +2,35 @@
 This a utility file that contains formatting functions for a Semgrep finding.
 """
 
-def finding_to_issue_summary(finding):
+def finding_to_issue_summary(finding, include_product_tag = False):
     cwe_brief = finding_to_cwe_brief(finding)
     id_brief = rule_id_brief(finding)
+    response = ""
 
     if (is_sca(finding)):
         package = sca_package(finding)
         semver_range = sca_semver_range(finding)
-        return f"[Semgrep Supply Chain] {cwe_brief} in {package} ({semver_range})"
+        response = f"{cwe_brief} in {package} ({semver_range})"
+        if include_product_tag:
+            response =  f"[Semgrep Supply Chain] {response}"
     
     elif (is_secrets(finding)):
         if cwe_brief == '':
-            return f"[Semgrep Secrets] {id_brief.capitalize()}"
+            response = f"{id_brief.capitalize()}"
         else:
-            return f"[Semgrep Secrets] {id_brief.capitalize()}: {cwe_brief}"
+            response = f"{id_brief.capitalize()}: {cwe_brief}"
+        if include_product_tag:
+            response =  f"[Semgrep Secrets] {response}"
     
     else:
         if cwe_brief == '':
-            return f"[Semgrep Code] {id_brief.capitalize()}"
+            response = f"{id_brief.capitalize()}"
         else:
-            return f"[Semgrep Code] {id_brief.capitalize()}: {cwe_brief}"
+            response = f"{id_brief.capitalize()}: {cwe_brief}"    
+        if include_product_tag:
+            response =  f"[Semgrep Code] {response}"
+    
+    return response
 
 def finding_to_issue_description(finding, repo):
     return (f"{message(finding)}\r\n"
@@ -89,6 +98,7 @@ def semgrep_policy(finding):
 def confidence(finding):
     return finding['extra']['metadata'].get('confidence') or "Low"
 
+
 def severity(finding):
     code_severity_mapping = {
         'info': 'Low',
@@ -96,10 +106,18 @@ def severity(finding):
         'error': 'High'
     }
 
+    sca_severity_mapping = {
+        'low': 'Low',
+        'moderate': 'Medium',
+        'high': 'High',
+        'critical': 'Critical'
+    }
+
     if (is_sca(finding)):
-        return finding['extra']['metadata']['sca-severity']
+        return sca_severity_mapping[finding['extra']['metadata']['sca-severity'].lower()]
     else:
         return code_severity_mapping[finding['extra']['severity'].lower()]
+
 
 def message(finding):
     return finding['extra']['message']
