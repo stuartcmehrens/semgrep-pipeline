@@ -29,11 +29,11 @@ export async function semgrepAdoPipelineTrigger(
       previewRun: false,
       templateParameters: {
         eventType: adoPullRequestEvent.eventType,
-        respositoryProjectName:
+        repositoryProjectName:
           adoPullRequestEvent.resource.repository.project.name,
         repositoryId: adoPullRequestEvent.resource.repository.id,
         repositoryName: adoPullRequestEvent.resource.repository.name,
-        respositoryWebUrl: adoPullRequestEvent.resource.repository.webUrl,
+        repositoryWebUrl: adoPullRequestEvent.resource.repository.webUrl,
         repositoryRemoteUrl: adoPullRequestEvent.resource.repository.remoteUrl,
         pullRequestId: `${adoPullRequestEvent.resource.pullRequestId}`,
         lastMergeCommitId:
@@ -98,7 +98,7 @@ const validateWebhookRequest = async (
 };
 
 app.http("semgrepAdoPipelineTrigger", {
-  methods: ["GET", "POST"],
+  methods: ["POST"],
   authLevel: "anonymous",
   handler: semgrepAdoPipelineTrigger,
 });

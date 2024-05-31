@@ -36,7 +36,7 @@ stages:
       - name: scanTargetPath
         value: $(Agent.BuildDirectory)/${{ parameters.repositoryName }}
       - name: lastMergeTargetCommitId
-        value: ${{ parameters.lastMergeCommitTargetId }}
+        value: ${{ parameters.lastMergeTargetCommitId }}
       - name: lastMergeCommitId
         value: ${{ parameters.lastMergeCommitId }}
       - name: scanningRepositoryName

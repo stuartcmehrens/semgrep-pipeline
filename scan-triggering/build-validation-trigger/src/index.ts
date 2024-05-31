@@ -40,7 +40,7 @@ const runPipeline = async () => {
           repositoryRemoteUrl: sourceRepositoryUri,
           pullRequestId: pullRequestId,
           lastMergeCommitId: sourceCommitId,
-          lastMergeCommitTargetId: pullRequest.lastMergeTargetCommit.commitId,
+          lastMergeTargetCommitId: pullRequest.lastMergeTargetCommit.commitId,
           sourceRefName: sourceBranch,
           targetRefName: targetBranch,
         },

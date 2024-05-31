@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 
 dotenv.config();
 export default () => {
-  const token = process.env.PERSONAL_ACCESS_TOKEN || "";
+  const token = process.env.AZURE_TOKEN || "";
   const orgUrl = process.env.ORG_URL || "";
   let connection: azdev.WebApi | undefined;
   try {

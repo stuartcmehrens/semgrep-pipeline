@@ -15,7 +15,7 @@ parameters:
     type: number
   - name: lastMergeCommitId
     type: string
-  - name: lastMergeCommitTargetId
+  - name: lastMergeTargetCommitId
     type: string
   - name: sourceRefName
     type: string
@@ -31,7 +31,7 @@ stages:
       - name: scanTargetPath
         value: $(Agent.BuildDirectory)/${{ parameters.repositoryName }}
       - name: lastMergeTargetCommitId
-        value: ${{ parameters.lastMergeCommitTargetId }}
+        value: ${{ parameters.lastMergeTargetCommitId }}
       - name: lastMergeCommitId
         value: ${{ parameters.lastMergeCommitId }}
       - name: scanningRepositoryName

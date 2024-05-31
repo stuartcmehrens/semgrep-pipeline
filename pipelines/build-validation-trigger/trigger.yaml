@@ -1,10 +1,10 @@
 trigger: none
 stages:
-  - stage: Semgrep
+  - stage: Trigger
     pool:
       vmImage: ubuntu-latest
     variables:
-      - group: semgrep-ci
+      - group: pr-diff-scanning-testing
       - name: pullRequestId
         value: $[variables['system.pullRequest.pullRequestId']]
       - name: sourceBranch
@@ -19,7 +19,7 @@ stages:
         value: $(Build.SourcesDirectory)/scan-triggering/build-validation-trigger
     jobs:
       - job:
-        displayName: Trigger Semgrep Scan
+        displayName: Trigger Semgrep Scan Pipeline
         steps:
           - task: UseNode@1
             inputs:
@@ -36,10 +36,10 @@ stages:
             displayName: Invoke Semgrep Pipeline
             workingDirectory: $(workingDirectory)
             env:
-              ORG_URL: $(orgUrl)
-              PERSONAL_ACCESS_TOKEN: $(personalAccessToken)
-              PROJECT_NAME: $(projectName)
-              PIPELINE_ID: $(pipelineId)
+              ORG_URL: $(ORG_URL)
+              AZURE_TOKEN: $(AZURE_TOKEN)
+              PROJECT_NAME: $(PROJECT_NAME)
+              PIPELINE_ID: $(PIPELINE_ID)
               SOURCE_REPOSITORY_URI: $(sourceRepositoryUri)
               PULL_REQUEST_ID: $(pullRequestId)
               SOURCE_COMMIT_ID: $(sourceCommitId)
