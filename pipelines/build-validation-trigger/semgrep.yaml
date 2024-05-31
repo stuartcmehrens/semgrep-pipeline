@@ -96,13 +96,13 @@ stages:
               PULL_REQUEST_ID: ${{ parameters.pullRequestId }}
               REPOSITORY_ID: ${{ parameters.repositoryId }}
               REPOSITORY_NAME: ${{ parameters.repositoryName }}
-              REPOSITORY_DISPLAY_NAME: ${{ parameters.repositoryProjectName }}/${{ parameters.repositoryName }}
+              REPOSITORY_DISPLAY_NAME: ${{ parameters.projectName }}/${{ parameters.repositoryName }}
               SCAN_TYPE: diff
               SOURCE_REF_NAME: ${{ parameters.sourceRefName }}
               LAST_MERGE_COMMIT_ID: $(lastMergeCommitId)
               LAST_MERGE_TARGET_COMMIT_ID: $(lastMergeTargetCommitId)
               AZURE_TOKEN: $(AZURE_TOKEN)
-              REPOSITORY_PROJECT_NAME: ${{ parameters.repositoryProjectName }}
+              REPOSITORY_PROJECT_NAME: ${{ parameters.projectName }}
               SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
               SCAN_TARGET_PATH: $(scanTargetPath)
               REPOSITORY_WEB_URL: ${{ parameters.repositoryWebUrl }}
