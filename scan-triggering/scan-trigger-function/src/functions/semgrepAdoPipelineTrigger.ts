@@ -38,7 +38,7 @@ export async function semgrepAdoPipelineTrigger(
         pullRequestId: `${adoPullRequestEvent.resource.pullRequestId}`,
         lastMergeCommitId:
           adoPullRequestEvent.resource.lastMergeCommit.commitId,
-        lastMergeCommitTargetId:
+        lastMergeTargetCommitId:
           adoPullRequestEvent.resource.lastMergeTargetCommit.commitId,
         sourceRefName: adoPullRequestEvent.resource.sourceRefName,
         targetRefName: adoPullRequestEvent.resource.targetRefName,

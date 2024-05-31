@@ -9,7 +9,7 @@
 			"isBackground": true,
 			"dependsOn": "npm build (functions)",
 			"options": {
-				"cwd": "${workspaceFolder}/scan-trigger-function"
+				"cwd": "${workspaceFolder}/scan-triggering/scan-trigger-function"
 			}
 		},
 		{
@@ -19,7 +19,7 @@
 			"dependsOn": "npm clean (functions)",
 			"problemMatcher": "$tsc",
 			"options": {
-				"cwd": "${workspaceFolder}/scan-trigger-function"
+				"cwd": "${workspaceFolder}/scan-triggering/scan-trigger-function"
 			}
 		},
 		{
@@ -27,7 +27,7 @@
 			"label": "npm install (functions)",
 			"command": "npm install",
 			"options": {
-				"cwd": "${workspaceFolder}/scan-trigger-function"
+				"cwd": "${workspaceFolder}/scan-triggering/scan-trigger-function"
 			}
 		},
 		{
@@ -37,7 +37,7 @@
 			"dependsOn": "npm build (functions)",
 			"problemMatcher": [],
 			"options": {
-				"cwd": "${workspaceFolder}/scan-trigger-function"
+				"cwd": "${workspaceFolder}/scan-triggering/scan-trigger-function"
 			}
 		},
 		{
@@ -46,7 +46,7 @@
 			"command": "npm run clean",
 			"dependsOn": "npm install (functions)",
 			"options": {
-				"cwd": "${workspaceFolder}/scan-trigger-function"
+				"cwd": "${workspaceFolder}/scan-triggering/scan-trigger-function"
 			}
 		}
 	]

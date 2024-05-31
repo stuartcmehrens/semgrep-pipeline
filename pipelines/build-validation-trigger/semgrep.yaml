@@ -1,12 +1,7 @@
 trigger: none
 
 parameters:
-  - name: eventType
-    type: string
-    values:
-      - git.pullrequest.created
-      - git.pullrequest.updated
-  - name: repositoryProjectName
+  - name: projectName
     type: string
   - name: repositoryId
     type: string
@@ -20,7 +15,7 @@ parameters:
     type: number
   - name: lastMergeCommitId
     type: string
-  - name: lastMergeTargetCommitId
+  - name: lastMergeCommitTargetId
     type: string
   - name: sourceRefName
     type: string
