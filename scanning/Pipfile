@@ -4,6 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+azure-devops = "*"
+pydantic = "*"
+pydantic-settings = "*"
 
 [dev-packages]
 

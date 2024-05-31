@@ -1,4 +1,3 @@
-import os
 import re
 import json
 
@@ -7,53 +6,44 @@ from azure.devops.v7_0.git.git_client import GitClient
 from azure.devops.v7_0.git.models import GitPullRequestSearchCriteria, GitPullRequestStatus, Comment, CommentThread, CommentThreadContext, CommentPosition
 from msrest.authentication import BasicAuthentication
 
+from config.settings import AzureDevOpsConfig
 import util.semgrep_finding as futil
 
-# globally scope the boilerplate vars
-azure_access_token = os.environ['AZURE_TOKEN'] # of your bot account
-organization_url = os.environ['SYSTEM_TEAMFOUNDATIONCOLLECTIONURI']
+azure_devops_config = AzureDevOpsConfig()
+build_pipeline_url = f"{azure_devops_config.organization_url}/{azure_devops_config.build_pipeline_project_name}/_build/results?buildId={azure_devops_config.build_buildid}"
 
-repo_id = os.environ['BUILD_REPOSITORY_ID']
-repo_project_name = re.search(r'azure\.com/[^/]+/([^/]+)/', os.environ['BUILD_REPOSITORY_URI']).group(1)
-repo_name = os.environ['BUILD_REPOSITORY_NAME']
-repo_branch = os.environ['BUILD_SOURCEBRANCHNAME']
-repo_url = re.sub(r"https://.*?@dev\.azure\.com", "https://dev.azure.com", os.environ['BUILD_REPOSITORY_URI'])
+credentials = BasicAuthentication('', azure_devops_config.azure_token)
+connection = Connection(base_url=azure_devops_config.organization_url, creds=credentials)
+git_client: GitClient = connection.clients.get_git_client()
 
-pipeline_project_name = os.environ['SYSTEM_TEAMPROJECT'] 
-pipeline_url = f"{organization_url}/{pipeline_project_name}/_build/results?buildId={os.environ['BUILD_BUILDID']}"
-
-credentials = BasicAuthentication('', azure_access_token)
-connection = Connection(base_url=organization_url, creds=credentials)
-git_client = connection.clients.get_git_client()
-
-def add_pr_status(pr, status):
+def add_pr_status(pull_request_id, status):
     if status == "pending":
         return git_client.create_pull_request_status(
             status=scan_pending_status(),
-            repository_id=repo_id,
-            pull_request_id=pr.pull_request_id
+            repository_id=azure_devops_config.repository_id,
+            pull_request_id=pull_request_id
         )
     elif status == "completed":
         return git_client.create_pull_request_status(
             status=scan_success_status(),
-            repository_id=repo_id,
-            pull_request_id=pr.pull_request_id
+            repository_id=azure_devops_config.repository_id,
+            pull_request_id=pull_request_id
         )
     elif status == "failed":
         return git_client.create_pull_request_status(
             status=scan_fail_status(),
-            repository_id=repo_id,
-            pull_request_id=pr.pull_request_id
+            repository_id=azure_devops_config.repository_id,
+            pull_request_id=pull_request_id
         )
 
-def add_pr_scan_completed(pr, semgrep_exit_code):
-    print(f"Adding PR scan completed status to {pr.code_review_id}")
+def add_pr_scan_completed(pull_request_id, semgrep_exit_code):
+    print(f"Adding PR scan completed status to {pull_request_id}")
 
 def scan_pending_status():
     return GitPullRequestStatus(
         state="pending",  # or "failed", "pending"
         description="Semgrep scan is in progress.",
-        target_url=pipeline_url,  # URL to the details of the build or status
+        target_url=build_pipeline_url,  # URL to the details of the build or status
         context={
             "name": "build",  # Context of the status (e.g., build, CI, approval)
             "genre": "continuous-integration"
@@ -64,7 +54,7 @@ def scan_success_status():
     return GitPullRequestStatus(
         state="succeeded",  # or "failed", "succeeded"
         description="Semgrep completed successfully. No blocking findings.",
-        target_url=pipeline_url,  # URL to the details of the build or status
+        target_url=build_pipeline_url,  # URL to the details of the build or status
         context={
             "name": "build",  # Context of the status (e.g., build, CI, approval)
             "genre": "continuous-integration"
@@ -75,39 +65,42 @@ def scan_fail_status():
     return GitPullRequestStatus(
         state="failed",  # or "failed", "succeeded"
         description="Semgrep returned blocking findings. Please review and fix the issues.",
-        target_url=pipeline_url,  # URL to the details of the build or status
+        target_url=build_pipeline_url,  # URL to the details of the build or status
         context={
             "name": "build",  # Context of the status (e.g., build, CI, approval)
             "genre": "continuous-integration"
         }
     )
+
+def get_pr(pull_request_id: int, source_ref_name=None, target_ref_name=None):
+    pull_requests = get_prs(source_ref_name, target_ref_name)
+    for pr in pull_requests:
+        if pr.pull_request_id == pull_request_id:
+            return pr
+
+    return None
         
-def get_prs():
+def get_prs(source_ref_name=None, target_ref_name=None):
     # Prepare search criteria for pull requests
     search_criteria = GitPullRequestSearchCriteria(
-        source_ref_name=f'refs/heads/{repo_branch}',
-        status='active'
+        source_ref_name=source_ref_name,
+        target_ref_name=target_ref_name,
     )
 
     # List pull requests
-    prs = git_client.get_pull_requests_by_project(
-        project=repo_project_name,
+    return git_client.get_pull_requests_by_project(
+        project=azure_devops_config.repository_project_name,
         search_criteria=search_criteria
     )
 
-    for pr in prs:
-        pr.source_branch = pr.source_ref_name.split('/')[-1]
-        pr.repository.web_url = repo_url
-    return prs
-
-def get_comment_threads(pr):
+def get_comment_threads(pull_request_id):
     return git_client.get_threads(
-        repo_id,
-        pr.pull_request_id,
-        project=repo_project_name
+        azure_devops_config.repository_id,
+        pull_request_id,
+        project=azure_devops_config.repository_project_name
     )
 
-def add_comment(pr, finding):
+def add_comment(pull_request_id, finding):
     print("todo")
     thread = CommentThread(
         comments=[Comment(
@@ -119,12 +112,12 @@ def add_comment(pr, finding):
 
     git_client.create_thread(
         thread,
-        repo_id,
-        pr.pull_request_id,
-        project=repo_project_name
+        azure_devops_config.repository_id,
+        pull_request_id,
+        project=azure_devops_config.repository_project_name
     )
 
-def add_inline_comment(pr, finding):
+def add_inline_comment(pull_request_id, finding):
     comment = comment_from_finding(finding)
 
     thread = CommentThread(
@@ -148,13 +141,13 @@ def add_inline_comment(pr, finding):
 
     git_client.create_thread(
         thread,
-        repo_id,
-        pr.pull_request_id,
-        project=repo_project_name
+        azure_devops_config.repository_id,
+        pull_request_id,
+        project=azure_devops_config.repository_project_name
     )
 
 def comment_hidden_group_key(finding):
-    group_key = futil.group_key(finding, {"name": repo_name})
+    group_key = futil.group_key(finding, {"name": azure_devops_config.build_repository_name})
     hidden_data = json.dumps({"group_key": group_key})
     return f"\n\n<!--{hidden_data}-->"
 
@@ -222,6 +215,6 @@ def get_pr_existing_keys(pr):
     return keys
 
 def has_existing_comment(pr, finding):
-    group_key = futil.group_key(finding, {"name": repo_name})
+    group_key = futil.group_key(finding, {"name": azure_devops_config.build_repository_name})
     existing_keys = get_pr_existing_keys(pr)
     return group_key in existing_keys

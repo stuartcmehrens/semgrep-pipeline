@@ -1,0 +1,122 @@
+trigger: none
+
+parameters:
+  - name: eventType
+    type: string
+    values:
+      - git.pullrequest.created
+      - git.pullrequest.updated
+  - name: repositoryProjectName
+    type: string
+  - name: repositoryId
+    type: string
+  - name: repositoryName
+    type: string
+  - name: repositoryWebUrl
+    type: string
+  - name: repositoryRemoteUrl
+    type: string
+  - name: pullRequestId
+    type: number
+  - name: lastMergeCommitId
+    type: string
+  - name: lastMergeCommitTargetId
+    type: string
+  - name: sourceRefName
+    type: string
+  - name: targetRefName
+    type: string
+
+stages:
+  - stage: Semgrep
+    pool:
+      vmImage: "ubuntu-latest"
+    variables:
+      - group: pr-diff-scanning-testing
+      - name: scanTargetPath
+        value: $(Agent.BuildDirectory)/${{ parameters.repositoryName }}
+      - name: lastMergeTargetCommitId
+        value: ${{ parameters.lastMergeCommitTargetId }}
+      - name: lastMergeCommitId
+        value: ${{ parameters.lastMergeCommitId }}
+      - name: scanningRepositoryName
+        value: semgrep-pipelines
+      - name: scanningRepositoryPath
+        value: $(Agent.BuildDirectory)/$(scanningRepositoryName)
+    jobs:
+      - job:
+        displayName: Semgrep Diff Scan
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+            displayName: "Checkout Scanning Repository"
+            path: $(scanningRepositoryName)
+
+          - script: |
+              mkdir -p $(scanTargetPath) && cd $(scanTargetPath)
+              git init
+              git remote add origin ${{ parameters.repositoryRemoteUrl }}
+              git config gc.auto 0
+              git config core.longpaths true
+              git config http.version HTTP/1.1
+              if [[ -z "$ENCODED_PAT" ]]; then
+                  echo "encodedPat is null or empty. using System.AccessToken for authentication with remote repository."
+                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: bearer $(System.AccessToken)"
+              else
+                  echo "Using encodedPat for authentication with remote repository."
+                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: Basic $(encodedPat)"
+              fi
+
+              echo "Last merge target commit id: $(lastMergeTargetCommitId)"
+              git fetch --force --tags --prune --prune-tags --progress --no-recurse-submodules origin --depth=1  +$(lastMergeCommitId):refs/remotes/origin/$(lastMergeCommitId)
+              git fetch --force --tags --prune --prune-tags --progress --no-recurse-submodules origin --depth=1  +$(lastMergeTargetCommitId):refs/remotes/origin/$(lastMergeTargetCommitId)
+              git checkout --progress --force refs/remotes/origin/$(lastMergeCommitId)
+              echo "running git clean"
+              git clean -ffdx
+              echo "running cat-file -e $(lastMergeTargetCommitId) and writing exit code"
+              git cat-file -e $(lastMergeTargetCommitId)
+              echo $?
+            displayName: "Checkout Target Scan Repository"
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.11"
+              addToPath: true
+              architecture: "x64"
+            displayName: "Use Python 3.11"
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install --user pipenv
+              pipenv install
+            displayName: "Install Python Dependencies"
+            workingDirectory: $(scanningRepositoryPath)/scanning
+
+          - script: |
+              pipenv run python src/semgrep_scan.py
+            displayName: "Run Semgrep Scan"
+            workingDirectory: $(scanningRepositoryPath)/scanning
+            env:
+              PULL_REQUEST_ID: ${{ parameters.pullRequestId }}
+              REPOSITORY_ID: ${{ parameters.repositoryId }}
+              REPOSITORY_NAME: ${{ parameters.repositoryName }}
+              REPOSITORY_DISPLAY_NAME: ${{ parameters.repositoryProjectName }}/${{ parameters.repositoryName }}
+              SCAN_TYPE: diff
+              SOURCE_REF_NAME: ${{ parameters.sourceRefName }}
+              LAST_MERGE_COMMIT_ID: $(lastMergeCommitId)
+              LAST_MERGE_TARGET_COMMIT_ID: $(lastMergeTargetCommitId)
+              AZURE_TOKEN: $(AZURE_TOKEN)
+              REPOSITORY_PROJECT_NAME: ${{ parameters.repositoryProjectName }}
+              SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
+              SCAN_TARGET_PATH: $(scanTargetPath)
+              REPOSITORY_WEB_URL: ${{ parameters.repositoryWebUrl }}
+              OUTPUT_DIRECTORY: $(scanningRepositoryPath)/scanning
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "$(scanningRepositoryPath)/scanning/semgrep-results.json"
+              artifact: "semgrep-results"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Publish Semgrep Results"

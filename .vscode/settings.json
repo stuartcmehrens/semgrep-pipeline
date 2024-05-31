@@ -1,0 +1,19 @@
+{
+  "[typescript]": {
+      "editor.formatOnSave": true,
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+  "[python]": {
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.formatOnType": true,
+    "editor.wordBasedSuggestions": "off",
+  },
+  "azureFunctions.deploySubpath": "scan-trigger-function",
+  "azureFunctions.postDeployTask": "npm install (functions)",
+  "azureFunctions.projectSubpath": "scan-trigger-function",
+  "azureFunctions.projectLanguage": "TypeScript",
+  "azureFunctions.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.projectLanguageModel": 4,
+  "azureFunctions.preDeployTask": "npm prune (functions)"
+}
