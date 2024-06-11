@@ -1,0 +1,33 @@
+{
+    "name": "semgrep-azdevops-cli",
+    "version": "1.0.0",
+    "main": "dist/src/index.js",
+    "bin": {
+      "semgrep-azdevops": "./dist/src/index.js"
+    },
+    "scripts": {
+      "format": "npx prettier . --write",
+      "build": "tsc",
+      "watch": "tsc -w",
+      "clean": "rimraf dist",
+      "prestart": "npm run clean && npm run build",
+      "start:dev": "npm run prestart && node dist/src/index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+      "@types/js-yaml": "^4.0.9",
+      "@types/node": "^20.12.12",
+      "prettier": "3.2.5",
+      "rimraf": "^5.0.7",
+      "typescript": "^5.4.5"
+    },
+    "dependencies": {
+      "azure-devops-node-api": "^13.0.0",
+      "commander": "^12.1.0",
+      "dotenv": "^16.4.5",
+      "js-yaml": "^4.1.0"
+    }
+  }

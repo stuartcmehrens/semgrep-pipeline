@@ -61,7 +61,7 @@ export async function semgrepAdoPipelineTrigger(
     // instead of returning a 500 status code, log the error and return a 202 status code
     // this prevents DevOps from possibly disabling the webhook
     // we may want to optionally notify the team that the pipeline failed to trigger
-    console.error("Failed to trigger pipeline: ", error);
+    context.error("Failed to trigger pipeline: ", error);
     return { status: 202 };
   }
 }
@@ -99,6 +99,6 @@ const validateWebhookRequest = async (
 
 app.http("semgrepAdoPipelineTrigger", {
   methods: ["POST"],
-  authLevel: "anonymous",
+  authLevel: "function",
   handler: semgrepAdoPipelineTrigger,
 });
