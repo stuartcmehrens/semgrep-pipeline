@@ -4,7 +4,7 @@ stages:
     pool:
       vmImage: ubuntu-latest
     variables:
-      - group: pr-diff-scanning-testing
+      - group: semgrep-pipeline-vg
       - name: pullRequestId
         value: $[variables['system.pullRequest.pullRequestId']]
       - name: sourceBranch

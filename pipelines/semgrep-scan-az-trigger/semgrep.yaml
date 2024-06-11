@@ -32,7 +32,7 @@ stages:
     pool:
       vmImage: "ubuntu-latest"
     variables:
-      - group: pr-diff-scanning-testing
+      - group: semgrep-pipeline-vg
       - name: scanTargetPath
         value: $(Agent.BuildDirectory)/${{ parameters.repositoryName }}
       - name: lastMergeTargetCommitId
