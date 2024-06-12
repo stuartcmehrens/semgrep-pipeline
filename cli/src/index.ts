@@ -85,9 +85,8 @@ webhooksCommand
     "--subscription-id <ids>",
     "The ID of the subscription to delete. Can be a comma-separated list of IDs enclosed in quotes.",
     (value, _) => {
-      const rawIds = value.split(",");
       const ids = [];
-      rawIds.forEach((id) => {
+      value.split(",").forEach((id) => {
         const trimmedId = id?.trim();
         if (trimmedId?.length > 0) ids.push(trimmedId);
       });

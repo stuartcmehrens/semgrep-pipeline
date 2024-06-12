@@ -1,39 +1,21 @@
 trigger: none
 
-parameters:
-  - name: projectName
-    type: string
-  - name: repositoryId
-    type: string
-  - name: repositoryName
-    type: string
-  - name: repositoryWebUrl
-    type: string
-  - name: repositoryRemoteUrl
-    type: string
-  - name: pullRequestId
-    type: number
-  - name: lastMergeCommitId
-    type: string
-  - name: lastMergeTargetCommitId
-    type: string
-  - name: sourceRefName
-    type: string
-  - name: targetRefName
-    type: string
-
 stages:
   - stage: Semgrep
     pool:
       vmImage: "ubuntu-latest"
     variables:
       - group: semgrep-pipeline-vg
-      - name: scanTargetPath
-        value: $(Agent.BuildDirectory)/${{ parameters.repositoryName }}
-      - name: lastMergeTargetCommitId
-        value: ${{ parameters.lastMergeTargetCommitId }}
-      - name: lastMergeCommitId
-        value: ${{ parameters.lastMergeCommitId }}
+      - name: pullRequestId
+        value: $[variables['system.pullRequest.pullRequestId']]
+      - name: sourceBranch
+        value: $[variables['system.pullRequest.sourceBranch']]
+      - name: targetBranch
+        value: $[variables['system.pullRequest.targetBranch']]
+      - name: sourceCommitId
+        value: $[variables['system.pullRequest.sourceCommitId']]
+      - name: sourceRepositoryUri
+        value: $[variables['system.pullRequest.sourceRepositoryUri']]
       - name: scanningRepositoryName
         value: semgrep-pipelines
       - name: scanningRepositoryPath
@@ -49,24 +31,63 @@ stages:
             path: $(scanningRepositoryName)
 
           - script: |
+              json=$(az repos pr list \
+                  --source-branch $(sourceBranch) \
+                  --target-branch $(targetBranch) \
+                  --query "[?pullRequestId == \`$(pullRequestId)\`]" \
+                  | jq -r '.[0]? | { repositoryId: .repository.id, lastMergeTargetCommitId: .lastMergeTargetCommit.commitId }')
+
+              if [[ -z "$json" ]]; then
+                  echo "No pull request found with the given pull request id '$(pullRequestId)' for source branch '$(sourceBranch)'."
+                  exit 1
+              fi
+
+              # there are ways to do this via a loop or one-liner with jq but for now, we will keep it simple
+              REPOSITORY_ID=$(echo $json | jq -r '.repositoryId')
+              LAST_MERGE_TARGET_COMMIT_ID=$(echo $json | jq -r '.lastMergeTargetCommitId')
+
+              json=$(az repos list \
+                  --query "[?id=='$REPOSITORY_ID']" \
+                  | jq -r '.[0]? | { repositoryName: .name, repositoryWebUrl: .webUrl }')
+
+              if [[ -z "$json" ]]; then
+                  echo "Unable to fetch repository with id '$REPOSITORY_ID'."
+                  exit 1
+              fi
+              
+              # there are ways to do this via a loop or one-liner with jq but for now, we will keep it simple
+              REPOSITORY_NAME=$(echo $json | jq -r '.repositoryName')
+              REPOSITORY_WEB_URL=$(echo $json | jq -r '.repositoryWebUrl')
+
+              echo "##vso[task.setvariable variable=repositoryId]$REPOSITORY_ID"
+              echo "##vso[task.setvariable variable=lastMergeTargetCommitId]$LAST_MERGE_TARGET_COMMIT_ID"
+              echo "##vso[task.setvariable variable=repositoryName]$REPOSITORY_NAME"
+              echo "##vso[task.setvariable variable=repositoryWebUrl]$REPOSITORY_WEB_URL"
+              echo "##vso[task.setvariable variable=scanTargetPath]$(Agent.BuildDirectory)/$REPOSITORY_NAME"
+            displayName: "Set Environment Variables"
+            env:
+              AZURE_DEVOPS_EXT_PAT: $(AZURE_TOKEN)
+
+          - script: |
               mkdir -p $(scanTargetPath) && cd $(scanTargetPath)
               git init
-              git remote add origin ${{ parameters.repositoryRemoteUrl }}
+              git remote add origin $(sourceRepositoryUri)
               git config gc.auto 0
               git config core.longpaths true
               git config http.version HTTP/1.1
-              if [[ -z "$ENCODED_PAT" ]]; then
-                  echo "encodedPat is null or empty. using System.AccessToken for authentication with remote repository."
-                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: bearer $(System.AccessToken)"
+              if [[ "$(USE_PAT_FOR_GIT_AUTH)" == "true" ]]; then
+                  echo "Using PAT for authentication with remote repository."
+                  ENCODED_PAT=$(echo -n 'u:$(AZURE_TOKEN)' | base64)
+                  git config http.$(sourceRepositoryUri).extraheader "AUTHORIZATION: Basic $ENCODED_PAT"
               else
-                  echo "Using encodedPat for authentication with remote repository."
-                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: Basic $(encodedPat)"
+                  echo "Using System.AccessToken for authentication with remote repository."
+                  git config http.$(sourceRepositoryUri).extraheader "AUTHORIZATION: bearer $(System.AccessToken)"
               fi
 
               echo "Last merge target commit id: $(lastMergeTargetCommitId)"
-              git fetch --force --tags --prune --prune-tags --progress --no-recurse-submodules origin --depth=1  +$(lastMergeCommitId):refs/remotes/origin/$(lastMergeCommitId)
+              git fetch --force --tags --prune --prune-tags --progress --no-recurse-submodules origin --depth=1  +$(sourceCommitId):refs/remotes/origin/$(sourceCommitId)
               git fetch --force --tags --prune --prune-tags --progress --no-recurse-submodules origin --depth=1  +$(lastMergeTargetCommitId):refs/remotes/origin/$(lastMergeTargetCommitId)
-              git checkout --progress --force refs/remotes/origin/$(lastMergeCommitId)
+              git checkout --progress --force refs/remotes/origin/$(sourceCommitId)
               echo "running git clean"
               git clean -ffdx
               echo "running cat-file -e $(lastMergeTargetCommitId) and writing exit code"
@@ -84,7 +105,7 @@ stages:
           - script: |
               python -m pip install --upgrade pip
               pip install --user pipenv
-              pipenv install
+              pipenv install --ignore-pipfile
             displayName: "Install Python Dependencies"
             workingDirectory: $(scanningRepositoryPath)/scanning
 
@@ -93,19 +114,19 @@ stages:
             displayName: "Run Semgrep Scan"
             workingDirectory: $(scanningRepositoryPath)/scanning
             env:
-              PULL_REQUEST_ID: ${{ parameters.pullRequestId }}
-              REPOSITORY_ID: ${{ parameters.repositoryId }}
-              REPOSITORY_NAME: ${{ parameters.repositoryName }}
-              REPOSITORY_DISPLAY_NAME: ${{ parameters.projectName }}/${{ parameters.repositoryName }}
+              PULL_REQUEST_ID: $(pullRequestId)
+              REPOSITORY_ID: $(repositoryId)
+              REPOSITORY_NAME: $(repositoryName)
+              REPOSITORY_DISPLAY_NAME: $(System.TeamProject)/$(repositoryName)
               SCAN_TYPE: diff
-              SOURCE_REF_NAME: ${{ parameters.sourceRefName }}
-              LAST_MERGE_COMMIT_ID: $(lastMergeCommitId)
+              SOURCE_REF_NAME: $(sourceBranch)
+              LAST_MERGE_COMMIT_ID: $(sourceCommitId)
               LAST_MERGE_TARGET_COMMIT_ID: $(lastMergeTargetCommitId)
               AZURE_TOKEN: $(AZURE_TOKEN)
-              REPOSITORY_PROJECT_NAME: ${{ parameters.projectName }}
+              REPOSITORY_PROJECT_NAME: $(System.TeamProject)
               SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
               SCAN_TARGET_PATH: $(scanTargetPath)
-              REPOSITORY_WEB_URL: ${{ parameters.repositoryWebUrl }}
+              REPOSITORY_WEB_URL: $(repositoryWebUrl)
               OUTPUT_DIRECTORY: $(scanningRepositoryPath)/scanning
 
           - task: PublishPipelineArtifact@1
