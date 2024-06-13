@@ -60,12 +60,13 @@ stages:
               git config gc.auto 0
               git config core.longpaths true
               git config http.version HTTP/1.1
-              if [[ -z "$ENCODED_PAT" ]]; then
-                  echo "encodedPat is null or empty. using System.AccessToken for authentication with remote repository."
-                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: bearer $(System.AccessToken)"
+              if [[ "$(USE_PAT_FOR_GIT_AUTH)" == "true" ]]; then
+                  echo "Using PAT for authentication with remote repository."
+                  ENCODED_PAT=$(echo -n 'u:$(AZURE_TOKEN)' | base64)
+                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: Basic $ENCODED_PAT"
               else
-                  echo "Using encodedPat for authentication with remote repository."
-                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: Basic $(encodedPat)"
+                  echo "Using System.AccessToken for authentication with remote repository."
+                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: bearer $(System.AccessToken)"
               fi
 
               echo "Last merge target commit id: $(lastMergeTargetCommitId)"
@@ -89,7 +90,7 @@ stages:
           - script: |
               python -m pip install --upgrade pip
               pip install --user pipenv
-              pipenv install
+              pipenv install --ignore-pipfile
             displayName: "Install Python Dependencies"
             workingDirectory: $(scanningRepositoryPath)/scanning
 
