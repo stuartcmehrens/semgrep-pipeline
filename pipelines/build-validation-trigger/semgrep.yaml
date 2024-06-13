@@ -31,34 +31,46 @@ stages:
             path: $(scanningRepositoryName)
 
           - script: |
+              echo "getting pr details for pull request id '$(pullRequestId)' and source branch '$(sourceBranch)' targeting '$(targetBranch)' in project '$(System.TeamProject)'."
               json=$(az repos pr list \
+                  --project $(System.TeamProject) \
                   --source-branch $(sourceBranch) \
                   --target-branch $(targetBranch) \
                   --query "[?pullRequestId == \`$(pullRequestId)\`]" \
                   | jq -r '.[0]? | { repositoryId: .repository.id, lastMergeTargetCommitId: .lastMergeTargetCommit.commitId }')
-
-              if [[ -z "$json" ]]; then
-                  echo "No pull request found with the given pull request id '$(pullRequestId)' for source branch '$(sourceBranch)'."
-                  exit 1
-              fi
+              echo "got json: $json"
 
               # there are ways to do this via a loop or one-liner with jq but for now, we will keep it simple
               REPOSITORY_ID=$(echo $json | jq -r '.repositoryId')
               LAST_MERGE_TARGET_COMMIT_ID=$(echo $json | jq -r '.lastMergeTargetCommitId')
 
-              json=$(az repos list \
-                  --query "[?id=='$REPOSITORY_ID']" \
-                  | jq -r '.[0]? | { repositoryName: .name, repositoryWebUrl: .webUrl }')
-
-              if [[ -z "$json" ]]; then
-                  echo "Unable to fetch repository with id '$REPOSITORY_ID'."
+              if [[ -z "$REPOSITORY_ID" ]] || [[ -z "$LAST_MERGE_TARGET_COMMIT_ID" ]]; then
+                  echo "repository id '$REPOSITORY_ID' or last merge target commit id '$LAST_MERGE_TARGET_COMMIT_ID' not found for pull request id '$(pullRequestId)' in project '$(System.TeamProject)'."
                   exit 1
               fi
-              
+
+              echo "getting repository details for repository id '$REPOSITORY_ID' in project '$(System.TeamProject)'."
+              json=$(az repos list \
+                  --project $(System.TeamProject) \
+                  --query "[?id=='$REPOSITORY_ID']" \
+                  | jq -r '.[0]? | { repositoryName: .name, repositoryWebUrl: .webUrl }')
+              echo "got json: $json"
+
               # there are ways to do this via a loop or one-liner with jq but for now, we will keep it simple
               REPOSITORY_NAME=$(echo $json | jq -r '.repositoryName')
               REPOSITORY_WEB_URL=$(echo $json | jq -r '.repositoryWebUrl')
 
+              if [[ -z "$REPOSITORY_NAME" ]] || [[ -z "$REPOSITORY_WEB_URL" ]]; then
+                  echo "repository name '$REPOSITORY_NAME' or repository web url '$REPOSITORY_WEB_URL' not found for pull request id '$(pullRequestId)' in project '$(System.TeamProject)'."
+                  exit 1
+              fi
+
+              echo "setting environment variables."
+              echo "repositoryId: $REPOSITORY_ID"
+              echo "lastMergeTargetCommitId: $LAST_MERGE_TARGET_COMMIT_ID"
+              echo "repositoryName: $REPOSITORY_NAME"
+              echo "repositoryWebUrl: $REPOSITORY_WEB_URL"
+              echo "scanTargetPath: $(Agent.BuildDirectory)/$REPOSITORY_NAME"
               echo "##vso[task.setvariable variable=repositoryId]$REPOSITORY_ID"
               echo "##vso[task.setvariable variable=lastMergeTargetCommitId]$LAST_MERGE_TARGET_COMMIT_ID"
               echo "##vso[task.setvariable variable=repositoryName]$REPOSITORY_NAME"
