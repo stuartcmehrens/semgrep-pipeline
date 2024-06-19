@@ -9,7 +9,9 @@ This project provides resources for running semgrep scans in Azure DevOps pipeli
 - [pipelines](/pipelines/): Contains Azure DevOps pipeline definitions for running semgrep scans:
     - [build-validation-trigger](/pipelines/build-validation-trigger/): Contains a [semgrep.yaml](/pipelines/build-validation-trigger/semgrep.yaml) pipeline which is used triggered by build validation policies.
     - [semgrep-scan-az-trigger](/pipelines/semgrep-scan-az-trigger/): Contains a [semgrep.yaml](/pipelines/semgrep-scan-az-trigger/semgrep.yaml) defintion file which runs a semgrep scan. This pipeline is triggered by using Azire DevOps webhooks and the `scan-trigger-function` Azure Function mentioned above.
+    - [full-scans](/pipelines/full-scans/): Contains 3 yaml definition files used for scheduling full scans of repositories.
 - [cli](/cli/): A `node.js` cli for listing, creating, and deleting webhooks within Azure DevOps. The cli can be run as a docker container.
+- [full-scans](/full-scans/): A `node.js` application used for creating a full scan schedule and triggering the full scan pipeline.
 
 ## Getting Started
 
@@ -48,7 +50,7 @@ First, start by creating a new repository in Azure DevOps via the `import reposi
 6. The final step is to create Webhooks that can trigger our Azure Function created in step 4. To do this, go the [/cli](/cli/) directory and build the docker image used to run the CLI. With the image built, we can use docker to run our commands needed to create the Webhooks:
 ```bash
 docker run <image:tag> semgrep-azdevops webhooks create \
-    --u <ado_org_url> \
+    -u <ado_org_url> \
     -p <ado_project_name> \
     -t <ado_token> \
     --webhook-url <function_app_url> \
@@ -58,7 +60,7 @@ docker run <image:tag> semgrep-azdevops webhooks create \
 and
 ```bash
 docker run <image:tag> semgrep-azdevops webhooks create \
-    --u <ado_org_url> \
+    -u <ado_org_url> \
     -p <ado_project_name> \
     -t <ado_token> \
     --webhook-url <function_app_url> \
@@ -77,3 +79,77 @@ docker run <image:tag> semgrep-azdevops webhooks create \
     * `USE_PAT_FOR_GIT_AUTH`: set equal to true to use the PAT created in step 2 to perform authenticated requests via git (recommended). if otherwise, the builtin `$(System.AccessToken)` will be used.
 
 4. Finally, we need to create a build validation policy which will reference the previously created pipeline. Refer to Azure DevOps's documentation [here](https://learn.microsoft.com/en-us/azure/devops/repos/git/branch-policies?view=azure-devops&tabs=browser#build-validation). Since we want to create the policy at the project level, in Azure DevOps navigate to the following page: Project Settings -> Repos: Repositories -> Policies. When creating the policy, there are two options: 1. Protect the default branch of each repository and 2. Protect current and future branches matching a specified pattern. For getting starting quickly, choose the first option. Under the `Build Validation` section, click `+` to add a new policy. Point the policy to the build pipeline we created previously.
+
+## Full Scans
+Full Scans use 3 different pipelines in order to schedule scans across projects and repositories in Azure DevOps. The first pipeline, [/pipelines/full-scans/configuration.yaml](/pipelines/full-scans/configuration.yaml), is responsible for crawling all projects and repositories in Azure DevOps and then creating a schedule which evenly distributes all found repositories accross a 7 day week on an hourly basis. This yaml file is then uploaded as a pipeline artifact, to be used by another pipeline. The configuration pipeline is scheduled to run every hour.
+
+The second pipeline, [/pipelines/full-scans/schedule.yaml](/pipelines/full-scans/schedule.yaml), is resonsbile for scheduling full scans of repositories. When the configuration pipeline completes, it triggers the schedule pipeline to run. The schedule pipeline consumes the pipeline artifact from the configuration pipeline as welll as a [full-scan-config.yaml](/full-scans/configuration/full-scan-config.yaml) file. With these two configuration files, the schedule pipeline determines which repositories are eligible to be scanned and sends a request to the Azure DevOps API to invoke the third and final pipeline, which does the scanning. Scheduling results will be uploaded as an artifact to the schedule pipeline.
+
+The third pipeline, [/pipelines/full-scans/semgrep.yaml](/pipelines/full-scans/semgrep.yaml), is reposible for running a full scan of a repository. The results of full scans will be sent to the semgrep cloud platform.
+
+## Getting Started with Full Scans
+
+1. After importing this repository, [create the following 3 pipelines](https://learn.microsoft.com/en-us/azure/devops/pipelines/create-first-pipeline?view=azure-devops&tabs=java%2Cbrowser) in Azure DevOps:
+    * `configuration`: this pipeline should reference the [configuration](/pipelines/full-scans/configuration.yaml) yaml definition file.
+    * `schedule`: this pipeline should reference the [schedule](/pipelines/full-scans/schedule.yaml) yaml definition file.
+    * `semgrep`: this pipeline should reference the [semgrep](/pipelines/full-scans/semgrep.yaml) yaml definition file.
+
+2. Next, create a Personal Access Token which will be used for Git operations, like cloning repositories to scan as well as sending requests to the Azure DevOps API to trigger the `semgrep` pipeline.
+    > **_NOTE:_** if you have already created a PAT while configuring differential scans above, you may skip this step.
+
+3. We need to create an environment variable group that our pipelines will consume named `semgrep-pipeline-vg` with the following values:
+    * `AZURE_TOKEN`: the personal access token created in step 2.
+    * `SEMGREP_APP_TOKEN`: a semgrep token obtained from semgrep. Follow the steps listed [here](https://semgrep.dev/docs/deployment/add-semgrep-to-ci#add-semgrep-to-ci-1) for creating a new token.
+    * `USE_PAT_FOR_GIT_AUTH`: set equal to true to use the PAT created in step 2 to perform authenticated requests via git (recommended). if otherwise, the builtin `$(System.AccessToken)` will be used.
+    * `ADO_ORG_URL`: ADO org url. example `https://dev.azure.com/<org_name>`
+    * `SCAN_PIPELINE_ID`: The pipeline id of the `semgrep` pipeline created in step 1.
+    * `SCAN_PIPELINE_PROJECT_ID`:  The name or id of the Azure DevOps project that contains this repository.
+    > **_NOTE:_** if you have already created the variable group when setting up differential scans, you will need the add the `ADO_ORG_URL`, `SCAN_PIPELINE_ID`, and `SCAN_PIPELINE_PROJECT_ID` variables to the existing group.
+
+4. Locate the [full-scan-config.yaml](/full-scans/configuration/full-scan-config.yaml) yaml file and add project and repository ids for scanning. See the `Full Scan Config File` section below for more information.
+
+## Full Scan Config File
+
+The full scan configuration file has the following structure:
+```typescript
+{
+    overrides: [
+        {
+            repositoryId: string;
+            repositoryName: string;
+            adoConfig?: {
+                poolName?: string;
+                defaultBranch?: string;
+            };
+            semgrepConfig?: {
+                jobs?: number;
+                debug?: boolean;
+                verbose?: boolean;
+                maxMemory?: number;
+                semgrepCode?: boolean;
+                semgrepSecrets?: boolean;
+                semgrepSupplyChain?: boolean;
+            };
+            schedule?: {
+                utcDay: number | string;
+                utcHour: number;
+            };
+        };
+    ];
+    includedRepositories?: string | string[];
+    excludedRepositories?: string[];
+    includedProjects?: string | string[];
+    excludedProjects?: string[];
+}
+```
+
+For a repository to be considered for full scan scheduling, its repository id and its project id need to be added to the `includedRepositories` and `includedProjects` properties, respectively. Special syntax exists for this two properties as well. For example, to include all projects and all repositories, set the following in the yaml file:
+```yaml
+overrides: []
+includedRepositories: '*'
+includedProjects: '*'
+```
+
+The `excludedRepositories` and `excludedProjects` properties take precedence over their counterparts. For example, if a repository id is in both `includedRepositories` and `excludedRepositories`, the repository will not be scheduled for full scans.
+
+The `overrides` property allows you to override both Azure DevOps and Semgrep behavior on an individual repository basis. It is not a required property. A slight note about override behavior: if a repository id is included in the `overrides` property, its id and project id still need to be included in the `includedRepositories` and `includedProjects` properties.

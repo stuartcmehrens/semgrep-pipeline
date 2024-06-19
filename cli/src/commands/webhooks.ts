@@ -70,7 +70,7 @@ export class WebhookCommands extends CmdBase {
             resourceVersion: "1.0",
           };
     if (functionAppToken) {
-      webhookBody.consumerInputs.httpHeaders = `x-functions-key": ${functionAppToken}`;
+      webhookBody.consumerInputs.httpHeaders = `x-functions-key: ${functionAppToken}`;
     }
     return webhookBody;
   }

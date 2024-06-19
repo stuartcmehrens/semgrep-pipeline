@@ -1,0 +1,125 @@
+trigger: none
+
+parameters:
+  - name: repositoryProjectName
+    type: string
+  - name: repositoryId
+    type: string
+  - name: repositoryName
+    type: string
+  - name: repositoryWebUrl
+    type: string
+  - name: repositoryRemoteUrl
+    type: string
+  - name: defaultBranch
+    type: string
+  - name: poolName
+    type: string
+    default: "Azure Pipelines"
+  - name: jobs
+    type: number
+    default: -1
+  - name: debug
+    type: boolean
+    default: false
+  - name: verbose
+    type: boolean
+    default: false
+  - name: maxMemory
+    type: number
+    default: -1
+  - name: semgrepCode
+    type: boolean
+    default: true
+  - name: semgrepSecrets
+    type: boolean
+    default: true
+  - name: semgrepSupplyChain
+    type: boolean
+    default: true
+
+stages:
+  - stage: Semgrep
+    pool:
+      vmImage: "ubuntu-latest"
+    variables:
+      - group: semgrep-pipeline-vg
+      - name: scanTargetPath
+        value: $(Agent.BuildDirectory)/${{ parameters.repositoryName }}
+      - name: scanningRepositoryName
+        value: semgrep-pipelines
+      - name: scanningRepositoryPath
+        value: $(Agent.BuildDirectory)/$(scanningRepositoryName)
+    jobs:
+      - job:
+        displayName: Semgrep Full Scan
+        steps:
+          - checkout: self
+            clean: true
+            persistCredentials: true
+            displayName: "Checkout Scanning Repository"
+            path: $(scanningRepositoryName)
+
+          - script: |
+              mkdir -p $(scanTargetPath) && cd $(scanTargetPath)
+              git init
+              git remote add origin ${{ parameters.repositoryRemoteUrl }}
+              git config gc.auto 0
+              git config core.longpaths true
+              git config http.version HTTP/1.1
+              if [[ "$(USE_PAT_FOR_GIT_AUTH)" == "true" ]]; then
+                  echo "Using PAT for authentication with remote repository."
+                  ENCODED_PAT=$(echo -n 'u:$(AZURE_TOKEN)' | base64)
+                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: Basic $ENCODED_PAT"
+              else
+                  echo "Using System.AccessToken for authentication with remote repository."
+                  git config http.${{ parameters.repositoryRemoteUrl }}.extraheader "AUTHORIZATION: bearer $(System.AccessToken)"
+              fi
+
+              echo "Checking out default branch ${{ parameters.defaultBranch }}"
+              git fetch --force --tags --prune --prune-tags --progress --no-recurse-submodules origin --depth=1  +${{ parameters.defaultBranch }}:refs/remotes/origin/main
+              git checkout --progress --force refs/remotes/origin/main
+              echo "running git clean"
+              git clean -ffdx
+            displayName: "Checkout Target Scan Repository"
+
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.11"
+              addToPath: true
+              architecture: "x64"
+            displayName: "Use Python 3.11"
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install --user pipenv
+              pipenv install --ignore-pipfile
+            displayName: "Install Python Dependencies"
+            workingDirectory: $(scanningRepositoryPath)/scanning
+
+          - script: |
+              pipenv run python src/semgrep_scan.py
+            displayName: "Run Semgrep Scan"
+            workingDirectory: $(scanningRepositoryPath)/scanning
+            env:
+              REPOSITORY_ID: ${{ parameters.repositoryId }}
+              REPOSITORY_NAME: ${{ parameters.repositoryName }}
+              REPOSITORY_DISPLAY_NAME: ${{ parameters.repositoryProjectName }}/${{ parameters.repositoryName }}
+              SCAN_TYPE: full
+              AZURE_TOKEN: $(AZURE_TOKEN)
+              REPOSITORY_PROJECT_NAME: ${{ parameters.repositoryProjectName }}
+              SEMGREP_APP_TOKEN: $(SEMGREP_APP_TOKEN)
+              SCAN_TARGET_PATH: $(scanTargetPath)
+              REPOSITORY_WEB_URL: ${{ parameters.repositoryWebUrl }}
+              OUTPUT_DIRECTORY: $(scanningRepositoryPath)/scanning
+              SEMGREP_CODE: ${{ parameters.semgrepCode }}
+              SEMGREP_SECRETS: ${{ parameters.semgrepSecrets }}
+              SEMGREP_SUPPLY_CHAIN: ${{ parameters.semgrepSupplyChain }}
+
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: "$(scanningRepositoryPath)/scanning/semgrep-results.json"
+              artifact: "semgrep-results"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Publish Semgrep Results"
