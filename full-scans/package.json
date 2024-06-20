@@ -1,0 +1,26 @@
+{
+  "name": "full-scans",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rimraf -rf dist",
+    "build": "npm run clean && tsc",
+    "create-full-scan-schedule": "node ./dist/src/run/create-full-scan-schedule.js",
+    "schedule-full-scans": "node ./dist/src/run/schedule-full-scans.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "azure-devops-node-api": "^13.0.0",
+    "dotenv": "^16.4.5",
+    "yaml": "^2.4.5"
+  }
+}

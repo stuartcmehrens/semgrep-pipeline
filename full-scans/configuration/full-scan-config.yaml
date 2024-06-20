@@ -1,0 +1,29 @@
+# overrides:
+#   - repositoryId: id
+#     repositoryName: name
+#     adoConfig:
+#       poolName: pool
+#       defaultBranch: defaultBranch
+#     semgrepConfig:
+#       jobs: jobs
+#       debug: debug
+#       verbose: verbose
+#       maxMemory: maxMemory
+#       semgrepCode: true
+#       semgrepSecrets: true
+#       semgrepSupplyChain: true
+#     schedule:
+#       utcDay: 0
+#       utcHour: 0
+# includedRepositories: '*'
+# excludedRepositories:
+#   - repositoryId0
+# includedProjects: '*'
+# excludedProjects:
+#   - projectId0
+
+overrides: []
+includedRepositories: []
+excludedRepositories: []
+includedProjects: []
+excludedProjects: []

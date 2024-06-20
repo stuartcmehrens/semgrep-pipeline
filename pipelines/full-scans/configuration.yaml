@@ -1,0 +1,55 @@
+trigger: none
+
+schedules:
+- cron: '0 * * * *'
+  displayName: Hourly run
+  always: true
+  branches:
+    include:
+    - main
+
+stages:
+  - stage:
+    displayName: Create Full Scan Schedule for Semgrep Full Scans
+    pool:
+      vmImage: "ubuntu-latest"
+    variables:
+      - group: semgrep-pipeline-vg
+      - name: fullScanDirectory
+        value: full-scans
+      - name: scheduleOutputPath
+        value: $(Build.SourcesDirectory)/$(fullScanDirectory)/dist/schedule.yaml
+    jobs:
+      - job:
+        displayName: Generate Full Scan Schedule Artifact
+        steps:
+          - checkout: self
+            clean: true
+            displayName: "Checkout Scanning Repository"
+          
+          - task: UseNode@1
+            inputs:
+              version: "20.x"
+            displayName: "Install Node.js"
+
+          - script: |
+              npm install
+            displayName: "npm install"
+            workingDirectory: $(fullScanDirectory)
+
+          - script: |
+              npm run build && npm run create-full-scan-schedule
+            displayName: "build and run"
+            workingDirectory: $(fullScanDirectory)
+            env:
+              ADO_ORG_URL: $(ADO_ORG_URL)
+              AZURE_TOKEN: $(AZURE_TOKEN)
+              SCHEDULE_OUTPUT_PATH: $(scheduleOutputPath)
+          
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(scheduleOutputPath)
+              artifact: "full-scan-schedule"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Publish Full Scan Schedule Artifact"

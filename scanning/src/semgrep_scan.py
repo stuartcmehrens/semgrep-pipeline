@@ -20,10 +20,6 @@ def main():
     # an edge case exists if someone opens a PR, the pipeline runs, and then the PR is closed before the pipeline finishes
     pull_request = azure.get_pr(config.pull_request_id)
     if pull_request is not None and config.scan_type == "diff":
-        print(f"Running DIFF scan for changes on branch {config.source_ref_name} at commit {config.last_merge_commit_id} from commit {config.last_merge_target_commit_id}.")
-        print(f"New findings configured to comment/block will post to PRs:")
-        print(f"  - {config.pull_request_id}")
-
         pr_pending_status = azure.add_pr_status(config.pull_request_id, "pending")
         semgrep_exit_code = semgrep.diff_scan()
         if (semgrep_exit_code == 0):
@@ -41,8 +37,6 @@ def main():
         except FileNotFoundError:
             print(f"Semgrep results file not found. No comments will be posted to the PR.")
     elif config.scan_type == "full":
-        print(f"There are no open pull requests for the branch.")
-        print(f"Running FULL scan.")
         semgrep_exit_code = semgrep.full_scan()
     else:
         print(f"Invalid scan type: {config.scan_type}")

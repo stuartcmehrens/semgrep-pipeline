@@ -1,0 +1,69 @@
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: configuration
+    source: configuration
+    trigger:
+      branches:
+        include:
+        - main
+
+stages:
+  - stage:
+    displayName: Schedule Semgrep Full Scans
+    pool:
+      vmImage: "ubuntu-latest"
+    variables:
+      - group: semgrep-pipeline-vg
+      - name: fullScanDirectory
+        value: full-scans
+      - name: fullScanScheduleArtifactName
+        value: full-scan-schedule
+      - name: fullScanSchedulePath
+        value: $(Build.SourcesDirectory)/$(fullScanDirectory)
+      - name: fullScanConfigPath
+        value: $(Build.SourcesDirectory)/$(fullScanDirectory)/configuration/full-scan-config.yaml
+      - name: fullScanResultsOutputPath
+        value: $(Build.ArtifactStagingDirectory)/full-scan-results.yaml
+    jobs:
+      - job:
+        displayName: Schedule Semgrep Full Scans
+        steps:
+          - checkout: self
+            clean: true
+            displayName: "Checkout Scanning Repository"
+
+          - download: configuration
+            artifact: $(fullScanScheduleArtifactName)
+          
+          - task: UseNode@1
+            inputs:
+              version: "20.x"
+            displayName: "Install Node.js"
+
+          - script: |
+              npm install
+            displayName: "npm install"
+            workingDirectory: $(fullScanDirectory)
+
+          - script: |
+              npm run build && npm run schedule-full-scans
+            displayName: "build and run"
+            workingDirectory: $(fullScanDirectory)
+            env:
+              ADO_ORG_URL: $(ADO_ORG_URL)
+              AZURE_TOKEN: $(AZURE_TOKEN)
+              FULL_SCAN_RESULTS_OUTPUT_PATH: $(fullScanResultsOutputPath)
+              FULL_SCAN_SCHEDULE_PATH: $(Pipeline.Workspace)/configuration/$(fullScanScheduleArtifactName)/schedule.yaml
+              FULL_SCAN_CONFIG_PATH: $(fullScanConfigPath)
+              SCAN_PIPELINE_PROJECT_ID: $(SCAN_PIPELINE_PROJECT_ID)
+              SCAN_PIPELINE_ID: $(SCAN_PIPELINE_ID)
+          
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(fullScanResultsOutputPath)
+              artifact: "full-scan-results"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Publish Full Scan Scheduling Results"
