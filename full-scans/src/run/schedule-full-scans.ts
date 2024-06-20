@@ -70,7 +70,7 @@ const run = async () => {
     fullScanResults.results.push({
       repositoryId: repository.id,
       repositoryName: repository.name,
-      schedulingResult: scheduleResult,
+      schedulingResult: scheduleResult ?? "successful",
     });
 
     await setTimeout(1000);
@@ -122,9 +122,11 @@ const includeRepositoryFilter = (
     return false;
   }
 
-  if (fullScanConfig.includedRepositories === "*") {
-    return true;
-  } else if (fullScanConfig.includedRepositories?.includes(repository.id)) {
+  if (
+    fullScanConfig.includedRepositories === "*" ||
+    (Array.isArray(fullScanConfig.includedRepositories) &&
+      fullScanConfig.includedRepositories?.includes(repository.id))
+  ) {
     return true;
   } else {
     console.log(
@@ -145,10 +147,10 @@ const repositoryIsIncluded = (
     return false;
   }
 
-  if (fullScanConfig.includedProjects === "*") {
-    return includeRepositoryFilter(repository, fullScanConfig);
-  } else if (
-    fullScanConfig.includedProjects?.includes(repository.adoProject.id)
+  if (
+    fullScanConfig.includedProjects === "*" ||
+    (Array.isArray(fullScanConfig.includedProjects) &&
+      fullScanConfig.includedProjects.includes(repository.adoProject.id))
   ) {
     return includeRepositoryFilter(repository, fullScanConfig);
   } else {

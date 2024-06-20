@@ -28,12 +28,6 @@ export interface OverrideConfig {
   };
 }
 
-export enum ScanTypeEnum {
-  Code = "code",
-  Secrets = "secrets",
-  SupplyChain = "supplyChain",
-}
-
 export interface FullScanResults {
   results: FullScanResult[];
   scheduleDay: number;
