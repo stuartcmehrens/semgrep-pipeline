@@ -1,0 +1,59 @@
+trigger: none
+
+schedules:
+- cron: '0 0 * * SUN'
+  displayName: Weekly Run at Midnight
+  always: true
+  branches:
+    include:
+    - main
+
+stages:
+  - stage:
+    displayName: Create Semgrep Findings Report
+    pool:
+      vmImage: "ubuntu-latest"
+    variables:
+      - group: semgrep-pipeline-vg
+      - name: reportOutputPath
+        value: $(Build.SourcesDirectory)/reporting/reports
+    jobs:
+      - job:
+        displayName: Generate Semgrep Report
+        steps:
+          - checkout: self
+            clean: true
+            displayName: "Checkout Scanning Repository"
+
+          - script: |
+              sudo apt-get install wkhtmltopdf
+            displayName: "Install wkhtmltopdf"
+          
+          - task: UsePythonVersion@0
+            inputs:
+              versionSpec: "3.11"
+              addToPath: true
+              architecture: "x64"
+            displayName: "Use Python 3.11"
+
+          - script: |
+              python -m pip install --upgrade pip
+              pip install --user pipenv
+              pipenv install --ignore-pipfile
+            displayName: "Install Python Dependencies"
+            workingDirectory: reporting
+
+          - script: |
+              pipenv run python src/semgrep_findings_to_csv_html_pdf_all_repos_filter_tag.py -t $(REPORTING_TAG)
+            displayName: "Generate Reports"
+            workingDirectory: reporting
+            env:
+              SEMGREP_API_WEB_TOKEN: $(SEMGREP_API_WEB_TOKEN)
+          
+          - task: PublishPipelineArtifact@1
+            inputs:
+              targetPath: $(reportOutputPath)
+              artifact: "semgrep-reports"
+              publishLocation: "pipeline"
+            condition: always()
+            displayName: "Publish Semgrep Reports"

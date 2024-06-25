@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+requests = "*"
+pandas = "*"
+fpdf = "*"
+pdfkit = "*"
+pypdf2 = "*"
+plotly = "*"
+xlsxwriter = "*"
+kaleido = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
