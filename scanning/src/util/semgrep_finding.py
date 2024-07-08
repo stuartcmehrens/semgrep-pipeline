@@ -151,3 +151,9 @@ def rule_id(finding):
 
 def rule_id_brief(finding):
     return rule_id(finding).split('.')[-1]
+
+def is_commentable(finding):
+    if (finding['check_id'].startswith('ssc')):
+        return finding['extra']['sca_info']['reachable'] # if ssc reachable
+    else:
+        return ('monitor' not in finding['extra']['metadata']['dev.semgrep.actions']) # code or secrets finding configured to comment / block
