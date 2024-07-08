@@ -4,6 +4,7 @@ import json
 from config.settings import BaseConfig
 import util.azure as azure
 import util.semgrep_scan as semgrep
+import util.semgrep_finding as futil
 
 config = BaseConfig()
 def log_start():
@@ -31,7 +32,7 @@ def main():
             with open('./semgrep-results.json') as f:
                 semgrep_results = json.load(f)
                 for finding in semgrep_results['results']:
-                    if not azure.has_existing_comment(config.pull_request_id, finding):
+                    if futil.is_commentable(finding) and not azure.has_existing_comment(config.pull_request_id, finding):
                         print(f"Posting to PR #{config.pull_request_id} comment for new finding: {finding}")
                         azure.add_inline_comment(config.pull_request_id, finding)   
         except FileNotFoundError:
