@@ -1,13 +1,17 @@
 trigger: none
 
+schedules:
+- cron: '*/15 * * * *'
+  displayName: Every 15 minutes
+  always: true
+  branches:
+    include:
+    - main
+
 resources:
   pipelines:
   - pipeline: configuration
     source: configuration
-    trigger:
-      branches:
-        include:
-        - main
 
 stages:
   - stage:
@@ -26,6 +30,8 @@ stages:
         value: $(Build.SourcesDirectory)/$(fullScanDirectory)/configuration/full-scan-config.yaml
       - name: fullScanResultsOutputPath
         value: $(Build.ArtifactStagingDirectory)/full-scan-results.yaml
+      - name: intervalInMinutes
+        value: 15
     jobs:
       - job:
         displayName: Schedule Semgrep Full Scans
@@ -56,9 +62,9 @@ stages:
               AZURE_TOKEN: $(AZURE_TOKEN)
               FULL_SCAN_RESULTS_OUTPUT_PATH: $(fullScanResultsOutputPath)
               FULL_SCAN_SCHEDULE_PATH: $(Pipeline.Workspace)/configuration/$(fullScanScheduleArtifactName)/schedule.yaml
-              FULL_SCAN_CONFIG_PATH: $(fullScanConfigPath)
               SCAN_PIPELINE_PROJECT_ID: $(SCAN_PIPELINE_PROJECT_ID)
               SCAN_PIPELINE_ID: $(SCAN_PIPELINE_ID)
+              INTERVAL_IN_MINUTES: $(intervalInMinutes)
           
           - task: PublishPipelineArtifact@1
             inputs:

@@ -1,19 +1,18 @@
-export type FullScanSchedule = AdoRepository[];
+import { OverrideConfig } from "./full-scan-config";
+
+export type FullScanSchedule = { [key: number]: AdoRepository[] };
 
 export interface AdoRepository {
   adoProject: {
     id: string;
     name: string;
   };
-  schedule: {
-    utcDay: number;
-    utcHour: number;
-  };
   id: string;
   name: string;
   defaultBranch: string;
   webUrl: string;
   remoteUrl: string;
+  overrideConfig?: OverrideConfig;
 }
 
 export interface AdoProject {

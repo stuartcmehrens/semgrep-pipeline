@@ -1,8 +1,8 @@
 trigger: none
 
 schedules:
-- cron: '0 * * * *'
-  displayName: Hourly run
+- cron: '5 0 * * 0'
+  displayName: Weekly Full Scan Schedule Creation Sunday at 00:05 UTC
   always: true
   branches:
     include:
@@ -19,6 +19,8 @@ stages:
         value: full-scans
       - name: scheduleOutputPath
         value: $(Build.SourcesDirectory)/$(fullScanDirectory)/dist/schedule.yaml
+      - name: fullScanConfigPath
+        value: $(Build.SourcesDirectory)/$(fullScanDirectory)/configuration/full-scan-config.yaml
     jobs:
       - job:
         displayName: Generate Full Scan Schedule Artifact
@@ -45,6 +47,7 @@ stages:
               ADO_ORG_URL: $(ADO_ORG_URL)
               AZURE_TOKEN: $(AZURE_TOKEN)
               SCHEDULE_OUTPUT_PATH: $(scheduleOutputPath)
+              FULL_SCAN_CONFIG_PATH: $(fullScanConfigPath)
           
           - task: PublishPipelineArtifact@1
             inputs:

@@ -37,10 +37,9 @@ export class DevOpsClient {
   async runPipeline(
     repository: AdoRepository,
     pipelineProjectId: string,
-    pipelineId: number,
-    overrideConfig?: OverrideConfig
+    pipelineId: number
   ): Promise<RunResult> {
-    const templateParameters = this.mergeConfig(repository, overrideConfig);
+    const templateParameters = this.mergeConfig(repository);
     try {
       const pipelinesApi = await this._adoApi.getPipelinesApi();
       const pipelineResult = await pipelinesApi.runPipeline(
@@ -59,10 +58,7 @@ export class DevOpsClient {
     }
   }
 
-  private mergeConfig(
-    repository: AdoRepository,
-    overrideConfig?: OverrideConfig
-  ) {
+  private mergeConfig(repository: AdoRepository) {
     const pipelineParameters = {
       repositoryProjectName: repository.adoProject.name,
       repositoryId: repository.id,
@@ -71,31 +67,38 @@ export class DevOpsClient {
       repositoryRemoteUrl: repository.remoteUrl,
       defaultBranch: repository.defaultBranch,
     };
-    if (!overrideConfig) {
+    if (!repository.overrideConfig) {
       return pipelineParameters;
     }
 
-    if (overrideConfig.adoConfig?.defaultBranch)
-      pipelineParameters.defaultBranch = overrideConfig.adoConfig.defaultBranch;
-    if (overrideConfig.adoConfig?.poolName)
-      pipelineParameters["poolName"] = overrideConfig.adoConfig.poolName;
-    if (overrideConfig.semgrepConfig?.jobs)
-      pipelineParameters["jobs"] = overrideConfig.semgrepConfig.jobs;
-    if (overrideConfig.semgrepConfig?.debug)
-      pipelineParameters["debug"] = overrideConfig.semgrepConfig.debug;
-    if (overrideConfig.semgrepConfig?.verbose)
-      pipelineParameters["verbose"] = overrideConfig.semgrepConfig.verbose;
-    if (overrideConfig.semgrepConfig?.maxMemory)
-      pipelineParameters["maxMemory"] = overrideConfig.semgrepConfig.maxMemory;
-    if (overrideConfig.semgrepConfig?.semgrepCode !== undefined)
+    if (repository.overrideConfig.adoConfig?.defaultBranch)
+      pipelineParameters.defaultBranch =
+        repository.overrideConfig.adoConfig.defaultBranch;
+    if (repository.overrideConfig.adoConfig?.poolName)
+      pipelineParameters["poolName"] =
+        repository.overrideConfig.adoConfig.poolName;
+    if (repository.overrideConfig.semgrepConfig?.jobs)
+      pipelineParameters["jobs"] = repository.overrideConfig.semgrepConfig.jobs;
+    if (repository.overrideConfig.semgrepConfig?.debug)
+      pipelineParameters["debug"] =
+        repository.overrideConfig.semgrepConfig.debug;
+    if (repository.overrideConfig.semgrepConfig?.verbose)
+      pipelineParameters["verbose"] =
+        repository.overrideConfig.semgrepConfig.verbose;
+    if (repository.overrideConfig.semgrepConfig?.maxMemory)
+      pipelineParameters["maxMemory"] =
+        repository.overrideConfig.semgrepConfig.maxMemory;
+    if (repository.overrideConfig.semgrepConfig?.semgrepCode !== undefined)
       pipelineParameters["semgrepCode"] =
-        overrideConfig.semgrepConfig.semgrepCode;
-    if (overrideConfig.semgrepConfig?.semgrepSecrets !== undefined)
+        repository.overrideConfig.semgrepConfig.semgrepCode;
+    if (repository.overrideConfig.semgrepConfig?.semgrepSecrets !== undefined)
       pipelineParameters["semgrepSecrets"] =
-        overrideConfig.semgrepConfig.semgrepSecrets;
-    if (overrideConfig.semgrepConfig?.semgrepSupplyChain !== undefined)
+        repository.overrideConfig.semgrepConfig.semgrepSecrets;
+    if (
+      repository.overrideConfig.semgrepConfig?.semgrepSupplyChain !== undefined
+    )
       pipelineParameters["semgrepSupplyChain"] =
-        overrideConfig.semgrepConfig.semgrepSupplyChain;
+        repository.overrideConfig.semgrepConfig.semgrepSupplyChain;
 
     return pipelineParameters;
   }
