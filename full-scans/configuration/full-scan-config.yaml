@@ -23,7 +23,7 @@
 #   - projectId0
 
 overrides: []
-includedRepositories: "*"
+includedRepositories: []
 excludedRepositories: []
-includedProjects: "*"
+includedProjects: []
 excludedProjects: []
