@@ -8,6 +8,11 @@ schedules:
     include:
     - main
 
+resources:
+  pipelines:
+  - pipeline: configuration
+    source: configuration
+
 stages:
   - stage:
     displayName: Schedule Semgrep Full Scans
