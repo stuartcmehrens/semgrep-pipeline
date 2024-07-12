@@ -33,12 +33,12 @@ const run = async () => {
 
   const fullScanResults: FullScanResults = {
     results: [],
-    startIntervalUTC: new Date(startIntervalUTCMilliseconds).toISOString(),
-    endIntervalUTC: new Date(endIntervalUTCMilliseconds).toISOString(),
+    startIntervalUTC: new Date(startIntervalUTCMilliseconds).toUTCString(),
+    endIntervalUTC: new Date(endIntervalUTCMilliseconds).toUTCString(),
   };
   if (batch.length === 0) {
     console.log(
-      `No repositories scheduled for this time slot '${now.toUTCString()}'. Exiting.`
+      `No repositories scheduled between ${fullScanResults.startIntervalUTC} and ${fullScanResults.endIntervalUTC}. Exiting.`
     );
     await writeFullScanResults(fullScanResults);
     return;
