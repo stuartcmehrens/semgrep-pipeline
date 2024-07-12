@@ -57,21 +57,23 @@ const createFullScanSchedule = async (
     const overrideConfig = fullScanConfig.overrides?.find(
       (config) => config.repositoryId === repository.id
     );
-    const scheduleDateUTCSeconds = getUTCScheduleDateForRepository(
+    const scheduleDateUTCMilliseconds = getUTCScheduleDateForRepository(
       repository.id,
       mostRecentSundayUTCSeconds,
       overrideConfig?.schedule
     );
-    if (!schedule[scheduleDateUTCSeconds]) {
-      schedule[scheduleDateUTCSeconds] = [];
+    if (!schedule[scheduleDateUTCMilliseconds]) {
+      schedule[scheduleDateUTCMilliseconds] = [];
     }
 
     console.log(
       `Scheduling repository ${repository.name} in project ${
         repository.project.name
-      } for full scan at ${new Date(scheduleDateUTCSeconds).toUTCString()}.`
+      } for full scan at ${new Date(
+        scheduleDateUTCMilliseconds
+      ).toUTCString()}.`
     );
-    schedule[scheduleDateUTCSeconds].push({
+    schedule[scheduleDateUTCMilliseconds].push({
       adoProject: {
         id: repository.project.id,
         name: repository.project.name,
@@ -108,7 +110,7 @@ const getUTCScheduleDateForRepository = (
   }
 
   const randomSeconds = Math.floor(generator() * SECONDS_IN_WEEK);
-  return mostRecentSundayUTCMilliseconds + randomSeconds;
+  return mostRecentSundayUTCMilliseconds + randomSeconds * 1000;
 };
 
 const stringToSeed = (str: string): number => {
@@ -131,7 +133,7 @@ const getMostRecentSundayUTCMilliseconds = (now: Date): number => {
   console.log(
     `most recent sunday: ${new Date(
       mostRecentSundayUTCMilliseconds
-    ).toISOString()}`
+    ).toUTCString()}`
   );
   return mostRecentSundayUTCMilliseconds;
 };

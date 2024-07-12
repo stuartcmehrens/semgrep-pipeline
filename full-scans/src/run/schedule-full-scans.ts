@@ -11,14 +11,13 @@ import { setTimeout } from "timers/promises";
 
 const { adoOrgUrl, adoToken, scheduleConsumer } = config();
 const devOpsClient = new DevOpsClient(adoOrgUrl, adoToken);
-const now = new Date();
 const run = async () => {
   const fullScanSchedule = await getFullScanSchedule();
-  const startIntervalUTCMilliseconds = getPreviousIntervalUTCMilliseconds(
+  const startIntervalUTCMilliseconds = getStartIntervalUTCMilliseconds(
     scheduleConsumer.intervalInMinutes
   );
   const endIntervalUTCMilliseconds =
-    startIntervalUTCMilliseconds + 60 * scheduleConsumer.intervalInMinutes;
+    startIntervalUTCMilliseconds + 60_000 * scheduleConsumer.intervalInMinutes;
 
   const batch: AdoRepository[] = [];
   for (const key in fullScanSchedule) {
@@ -63,14 +62,12 @@ const run = async () => {
   await writeFullScanResults(fullScanResults);
 };
 
-const getPreviousIntervalUTCMilliseconds = (
-  intervalMinutes: number
-): number => {
+const getStartIntervalUTCMilliseconds = (intervalMinutes: number): number => {
   const now = new Date();
-  const minutes = now.getMinutes();
+  const minutes = now.getUTCMinutes();
   const remainder = minutes % intervalMinutes;
-  now.setMinutes(minutes - remainder - intervalMinutes, 0, 0);
-  return now.getDate();
+  now.setUTCMinutes(minutes - remainder, 0, 0);
+  return now.getTime();
 };
 
 const getFullScanSchedule = async () => {
