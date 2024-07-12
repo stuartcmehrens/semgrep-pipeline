@@ -9,10 +9,7 @@ export interface FullScanConfig {
 export interface OverrideConfig {
   repositoryId: string;
   repositoryName: string;
-  schedule?: {
-    utcDay: number | string;
-    utcHour: number;
-  };
+  schedule?: Schedule;
   adoConfig?: {
     poolName?: string;
     defaultBranch?: string;
@@ -30,7 +27,17 @@ export interface OverrideConfig {
 
 export interface FullScanResults {
   results: FullScanResult[];
-  scheduleDay: number;
+  startIntervalUTC: string;
+  endIntervalUTC: string;
+}
+
+export interface Schedule {
+  frequency: string;
+}
+
+export enum Frequency {
+  Daily = "daily",
+  Weekly = "weekly",
 }
 
 interface FullScanResult {

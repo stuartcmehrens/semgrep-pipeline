@@ -1,8 +1,8 @@
 trigger: none
 
 schedules:
-- cron: '0 * * * *'
-  displayName: Hourly run
+- cron: '5 0 * * 0'
+  displayName: Weekly Full Scan Schedule Creation Sunday at 00:05 UTC
   always: true
   branches:
     include:
