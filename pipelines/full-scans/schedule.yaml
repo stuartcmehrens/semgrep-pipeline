@@ -62,7 +62,6 @@ stages:
               AZURE_TOKEN: $(AZURE_TOKEN)
               FULL_SCAN_RESULTS_OUTPUT_PATH: $(fullScanResultsOutputPath)
               FULL_SCAN_SCHEDULE_PATH: $(Pipeline.Workspace)/configuration/$(fullScanScheduleArtifactName)/schedule.yaml
-              FULL_SCAN_CONFIG_PATH: $(fullScanConfigPath)
               SCAN_PIPELINE_PROJECT_ID: $(SCAN_PIPELINE_PROJECT_ID)
               SCAN_PIPELINE_ID: $(SCAN_PIPELINE_ID)
               INTERVAL_IN_MINUTES: $(intervalInMinutes)
