@@ -13,6 +13,7 @@ class BaseConfig(BaseSettings):
     repository_display_Name: str
     scan_type: str
     build_buildid: int = Field(validation_alias=AliasChoices('BUILD_BUILDID'))
+    enable_pr_comments: bool = True
 
 class AzureDevOpsConfig(BaseConfig):
     azure_token: str

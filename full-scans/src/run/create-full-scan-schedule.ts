@@ -106,7 +106,7 @@ const getUTCScheduleDateForRepository = (
       now.getDate()
     );
     const randomSeconds = Math.floor(generator() * SECONDS_IN_DAY);
-    return todayAtMidnight.getDate() + randomSeconds;
+    return todayAtMidnight.getDate() + randomSeconds * 1000;
   }
 
   const randomSeconds = Math.floor(generator() * SECONDS_IN_WEEK);
