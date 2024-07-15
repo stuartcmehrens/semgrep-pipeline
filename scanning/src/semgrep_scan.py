@@ -28,15 +28,16 @@ def main():
         else:
             pr_ending_status = azure.add_pr_status(config.pull_request_id, "failed")
 
-        try:
-            with open('./semgrep-results.json') as f:
-                semgrep_results = json.load(f)
-                for finding in semgrep_results['results']:
-                    if futil.is_commentable(finding) and not azure.has_existing_comment(config.pull_request_id, finding):
-                        print(f"Posting to PR #{config.pull_request_id} comment for new finding: {finding}")
-                        azure.add_inline_comment(config.pull_request_id, finding)   
-        except FileNotFoundError:
-            print(f"Semgrep results file not found. No comments will be posted to the PR.")
+        if (config.enable_pr_comments):
+            try:
+                with open('./semgrep-results.json') as f:
+                    semgrep_results = json.load(f)
+                    for finding in semgrep_results['results']:
+                        if futil.is_commentable(finding) and not azure.has_existing_comment(config.pull_request_id, finding):
+                            print(f"Posting to PR #{config.pull_request_id} comment for new finding: {finding}")
+                            azure.add_inline_comment(config.pull_request_id, finding)   
+            except FileNotFoundError:
+                print(f"Semgrep results file not found. No comments will be posted to the PR.")
     elif config.scan_type == "full":
         semgrep_exit_code = semgrep.full_scan()
     else:
